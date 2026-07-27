@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technology | DirectCare Pulmonary Diagnostics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- NAVIGATION BAR -->
+    <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-3">
+                <span class="text-xl font-extrabold tracking-tight text-teal-400">DirectCare</span>
+                <span class="text-xs uppercase tracking-widest text-slate-400 border-l border-slate-700 pl-3 hidden sm:inline">Pulmonary Diagnostics LLC</span>
+            </a>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="index.html" class="hover:text-teal-400 transition">Home</a>
+                <a href="technology.html" class="text-teal-400 transition">Technology</a>
+                <a href="practices.html" class="hover:text-teal-400 transition">For Practices</a>
+                <a href="contact.html" class="hover:text-teal-400 transition">Contact & Demo</a>
+            </nav>
+            <a href="contact.html" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow">
+                Schedule a Demo
+            </a>
+        </div>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <section class="bg-slate-900 text-white py-16 px-6 text-center">
+        <h1 class="text-4xl font-extrabold mb-4">The PulmOne MiniBox+ Advantage</h1>
+        <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+            Replacing cumbersome 600-pound hospital body boxes with advanced, cabinetless aerodynamic plethysmography.
+        </p>
+    </section>
+
+    <!-- TECHNOLOGY DETAILS -->
+    <section class="py-20 px-6 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+            <div>
+                <span class="text-teal-600 font-bold text-xs uppercase tracking-widest">Hardware Innovation</span>
+                <h2 class="text-3xl font-extrabold text-slate-900 mt-2 mb-4">Gasless Lung Volumes in 60 Seconds</h2>
+                <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                    Traditional testing requires heavy helium or nitrogen dilution setups. The MiniBox+ measures Total Lung Capacity (TLC), Functional Residual Capacity (FRC), and Residual Volume (RV) seamlessly via tidal breathing.
+                </p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Designed for tabletop deployment in standard exam rooms, it allows us to set up, test, and pack down without interrupting your daily clinic flow.
+                </p>
+            </div>
+            <!-- IMAGE PLACEHOLDER FOR MINIBOX -->
+            <div class="bg-slate-200 border-2 border-dashed border-slate-300 rounded-2xl h-64 flex items-center justify-center text-slate-500 font-medium text-sm">
+                [ Insert MiniBox+ Photo Here ]
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 mb-2">Complete Suite</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">Performs pre/post bronchodilator spirometry, single-breath DLCO diffusion, and gasless lung volumes meeting strict ATS/ERS guidelines.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 mb-2">Infection Safety</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">Equipped with single-use, 0.025-micron inline viral/bacterial filter mouthpieces providing >99.999% bioburden protection.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 mb-2">Rapid Reporting</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">Encrypted reports backed by board-certified 1099 pulmonologist overreads delivered securely into your EMR within 24–48 hours.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-400 py-12 px-6 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-sm">
+                <p class="font-bold text-white">DirectCare Pulmonary Diagnostics LLC</p>
+                <p class="text-xs text-slate-500 mt-1">5537 State Route 508, Bellefontaine, OH 43311</p>
+            </div>
+            <div class="flex space-x-6 text-sm">
+                <a href="index.html" class="hover:text-teal-400 transition">Home</a>
+                <a href="technology.html" class="hover:text-teal-400 transition">Technology</a>
+                <a href="practices.html" class="hover:text-teal-400 transition">For Practices</a>
+                <a href="contact.html" class="hover:text-teal-400 transition">Contact</a>
+            </div>
+            <div class="text-xs text-slate-500 text-center md:text-right">
+                &copy; 2026 DirectCare. SDVOSB Certified.
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
