@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DirectCare Pulmonary Diagnostics LLC | Mobile PFT Services</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* This makes the white background of the image blend seamlessly into the white header */
+        .blend-logo {
+            mix-blend-mode: multiply;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
@@ -22,17 +28,18 @@
         </div>
     </div>
 
-    <!-- UNIFIED HEADER & BANNER -->
+    <!-- UNIFIED HEADER & BANNER WITH ENLARGED BLENDED LOGO -->
     <header class="sticky top-0 z-50 bg-white shadow-md border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-6 py-6 md:py-8 flex flex-col items-center gap-6">
-            <a href="index.html">
-                <img src="logo.png" alt="DirectCare Pulmonary Diagnostics Logo" class="h-28 md:h-36 w-auto object-contain">
+        <div class="max-w-7xl mx-auto px-6 py-4 md:py-6 flex flex-col items-center gap-4">
+            <a href="index.html" class="flex justify-center">
+                <img src="logo.png" alt="DirectCare Pulmonary Diagnostics Logo" class="h-36 md:h-48 w-auto object-contain blend-logo">
             </a>
             
-            <nav class="w-full border-t border-slate-100 pt-4 flex flex-wrap justify-center gap-8 text-sm font-semibold">
+            <nav class="w-full border-t border-slate-100 pt-3 flex flex-wrap justify-center gap-6 md:gap-8 text-sm font-semibold">
                 <a href="index.html" class="text-[#208882] border-b-2 border-[#208882] transition pb-1">Home</a>
                 <a href="technology.html" class="text-slate-700 hover:text-[#208882] transition pb-1">Technology (MiniBox+)</a>
                 <a href="practices.html" class="text-slate-700 hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
+                <a href="osha.html" class="text-slate-700 hover:text-[#208882] transition pb-1">OSHA Compliance</a>
                 <a href="about.html" class="text-slate-700 hover:text-[#208882] transition pb-1">About Founder</a>
                 <a href="contact.html" class="text-slate-700 hover:text-[#208882] transition pb-1">Contact & Demo</a>
             </nav>
@@ -165,6 +172,7 @@
                 <a href="index.html" class="hover:text-[#208882] transition">Home</a>
                 <a href="technology.html" class="hover:text-[#208882] transition">Technology</a>
                 <a href="practices.html" class="hover:text-[#208882] transition">For Practices</a>
+                <a href="osha.html" class="hover:text-[#208882] transition">OSHA Compliance</a>
                 <a href="about.html" class="hover:text-[#208882] transition">About</a>
                 <a href="contact.html" class="hover:text-[#208882] transition">Contact</a>
             </div>
