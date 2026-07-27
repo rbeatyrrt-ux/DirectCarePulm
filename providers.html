@@ -1,65 +1,173 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For Providers | DirectCare Pulmonary Diagnostics</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Clinical Guidance for Providers | DirectCare Pulmonary Diagnostics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>.blend-logo { mix-blend-mode: multiply; }</style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
-    <!-- Header / Navigation -->
-    <header class="site-header">
-        <div class="container nav-container">
-            <div class="logo">
-                <a href="index.html"><img src="images/logo.png" alt="DirectCare Pulmonary Diagnostics Logo" style="height: 110px; width: auto; display: block;"></a>
-            </div>
-            <nav class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="services.html">Services</a>
-                <a href="providers.html" style="color: #0ea5e9; font-weight: 600;">For Providers</a>
-                <a href="index.html#contact" class="btn-nav">Schedule a Visit</a>
+    <!-- TOP BAR -->
+    <div class="bg-[#0f223d] text-slate-200 text-xs py-2.5 px-6 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span>SDVOSB Certified &bull; West Central & Northwest Ohio Corridor</span>
+            <a href="tel:5028128457" class="hover:text-[#208882] transition font-medium">&#9743; (502) 812-8457</a>
+        </div>
+    </div>
+
+    <!-- HEADER WITH TOP-RIGHT PROMINENT LOGO -->
+    <header class="sticky top-0 z-50 bg-white shadow-lg border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col-reverse md:flex-row justify-between items-center gap-6">
+            <nav class="flex flex-wrap justify-center md:justify-start gap-6 md:gap-8 text-sm font-bold text-slate-700">
+                <a href="index.html" class="hover:text-[#208882] transition pb-1">Home</a>
+                <a href="technology.html" class="hover:text-[#208882] transition pb-1">Technology (MiniBox+)</a>
+                <a href="practices.html" class="hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
+                <a href="provider.html" class="text-[#208882] border-b-2 border-[#208882] transition pb-1">For Providers</a>
+                <a href="protocols.html" class="hover:text-[#208882] transition pb-1">Protocols & SOPs</a>
+                <a href="osha.html" class="hover:text-[#208882] transition pb-1">OSHA Compliance</a>
+                <a href="about.html" class="hover:text-[#208882] transition pb-1">About Founder</a>
+                <a href="contact.html" class="hover:text-[#208882] transition pb-1">Contact & Demo</a>
             </nav>
+            <a href="index.html" class="flex-shrink-0 bg-white p-2 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
+                <img src="logo.png" alt="DirectCare Logo" class="h-24 md:h-32 w-auto object-contain blend-logo">
+            </a>
         </div>
     </header>
 
-    <!-- Page Banner -->
-    <section class="hero" style="padding: 50px 0;">
-        <div class="container hero-content">
-            <h1>Partnerships Built for Independent Practices</h1>
-            <p>Designed for primary care providers, Direct Primary Care (DPC) clinics, and occupational health networks.</p>
-        </div>
+    <!-- PAGE HERO -->
+    <section class="bg-gradient-to-br from-[#0f223d] via-[#1A365D] to-[#0f223d] text-white py-20 px-6 text-center">
+        <span class="bg-[#208882]/30 text-teal-300 border border-[#208882]/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-4">
+            Physician & Provider Resource
+        </span>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+            Clinical Guidelines & <span class="text-[#319795]">Interpretation Standards</span>
+        </h1>
+        <p class="text-slate-300 max-w-3xl mx-auto text-base md:text-lg leading-relaxed">
+            Essential reference data for primary care providers detailing testing indications, reporting workflows, and international diagnostic standards.
+        </p>
     </section>
 
-    <!-- Content Section -->
-    <section class="benefits">
-        <div class="container">
-            <h2>Clinical Collaboration & Standards</h2>
-            <div class="grid-3">
-                <div class="card">
-                    <h3>Turnkey Operations</h3>
-                    <p>We supply all necessary medical-grade equipment and expert personnel, eliminating capital overhead for your facility.</p>
+    <!-- MAIN CONTENT -->
+    <main class="py-16 px-6 max-w-5xl mx-auto space-y-16">
+
+        <!-- SECTION 1: WHO TO TEST & FREQUENCY -->
+        <div class="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <span class="text-[#208882] font-bold text-xs uppercase tracking-widest">Patient Selection</span>
+            <h2 class="text-3xl font-extrabold text-slate-900">Who Should Be Tested & Frequency</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <h3 class="font-bold text-slate-900 text-lg mb-3">Indications for Testing</h3>
+                    <ul class="space-y-2 text-sm text-slate-700">
+                        <li>&#8226; Chronic cough, sputum production, or progressive dyspnea.</li>
+                        <li>&#8226; History of heavy occupational, environmental, or tobacco smoke exposure.</li>
+                        <li>&#8226; Evaluation of chronic obstructive pulmonary disease (COPD) or asthma phenotypes.</li>
+                        <li>&#8226; Pre-operative pulmonary risk assessment for cardiothoracic or upper abdominal surgeries.</li>
+                    </ul>
                 </div>
-                <div class="card">
-                    <h3>Streamlined Compliance</h3>
-                    <p>Ensure your patients receive timely diagnostics compliant with standard quality guidelines, paired with robust tele-pulmonology overreads.</p>
-                </div>
-                <div class="card">
-                    <h3>Flexible Scheduling</h3>
-                    <p>Coordinate routine diagnostic blocks tailored directly to your practice's patient volume and operational cadence.</p>
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <h3 class="font-bold text-slate-900 text-lg mb-3">Testing Frequency</h3>
+                    <ul class="space-y-2 text-sm text-slate-700">
+                        <li>&#8226; <strong>Baseline:</strong> Initial diagnostic evaluation when respiratory symptoms present.</li>
+                        <li>&#8226; <strong>Annual Monitoring:</strong> For chronic disease progression tracking or rapid therapeutic response verification.</li>
+                        <li>&#8226; <strong>Post-Exacerbation:</strong> Following major respiratory events to establish new personal baselines.</li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container footer-content">
-            <p>&copy; 2026 DirectCare Pulmonary Diagnostics LLC. All rights reserved.</p>
-            <p>Direct Inquiries: <a href="mailto:robert.beaty@directcarepulm.com">robert.beaty@directcarepulm.com</a> | Phone: <a href="tel:5028128457">502-812-8457</a></p>
+        <!-- SECTION 2: REPORTING & OVERREAD WORKFLOW -->
+        <div class="bg-blue-950 text-white p-8 md:p-12 rounded-3xl shadow-xl border border-blue-900 space-y-6">
+            <span class="text-teal-400 font-bold text-xs uppercase tracking-widest">Turnaround & Quality Assurance</span>
+            <h2 class="text-3xl font-extrabold">Report Interpretation & Management Recommendations</h2>
+            <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                Every completed PFT suite includes expert clinical interpretation structured to guide actionable patient management plans. 
+            </p>
+            <div class="bg-slate-900/80 p-6 rounded-2xl border border-blue-900 space-y-4">
+                <div class="flex items-start space-x-4">
+                    <div class="bg-[#208882] text-white font-bold px-3 py-1 rounded-lg text-sm">RRT</div>
+                    <div>
+                        <h4 class="font-bold text-teal-300">Preliminary RRT Read</h4>
+                        <p class="text-xs text-slate-300 mt-1">Performed immediately on-site by our Supervisory Respiratory Therapist to guarantee technical quality, acceptable waveforms, and ATS criteria compliance.</p>
+                    </div>
+                </div>
+                <hr class="border-slate-800">
+                <div class="flex items-start space-x-4">
+                    <div class="bg-teal-600 text-white font-bold px-3 py-1 rounded-lg text-sm">MD</div>
+                    <div>
+                        <h4 class="font-bold text-teal-300">Pulmonologist Final Read (24 – 48 Hours)</h4>
+                        <p class="text-xs text-slate-300 mt-1">A comprehensive diagnostic report with specialist interpretation and targeted management recommendations is securely delivered to your EMR within 24 to 48 hours.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: GOLD & GINA STANDARDS -->
+        <div class="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm space-y-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <span class="text-[#208882] font-bold text-xs uppercase tracking-widest">Global Evidence-Based Frameworks</span>
+                <h2 class="text-3xl font-extrabold text-slate-900 mt-2">GOLD & GINA Diagnostic Standards</h2>
+                <p class="text-slate-600 text-sm mt-2">Referencing international consensus guidelines for obstructive lung disease staging and control.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- GOLD -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-200 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-slate-900">GOLD Standards (COPD)</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded">Global Initiative for Chronic Obstructive Lung Disease</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Defines post-bronchodilator fixed ratio $FEV_1 / FVC < 0.70$ as persistent airflow limitation. Severity grading utilizes predicted $FEV_1$ percentages:
+                    </p>
+                    <ul class="space-y-2 text-xs text-slate-700">
+                        <li>&#8226; <strong>GOLD 1 (Mild):</strong> $FEV_1 \ge 80\%$ predicted</li>
+                        <li>&#8226; <strong>GOLD 2 (Moderate):</strong> $50\% \le FEV_1 < 80\%$ predicted</li>
+                        <li>&#8226; <strong>GOLD 3 (Severe):</strong> $30\% \le FEV_1 < 50\%$ predicted</li>
+                        <li>&#8226; <strong>GOLD 4 (Very Severe):</strong> $FEV_1 < 30\%$ predicted</li>
+                    </ul>
+                </div>
+
+                <!-- GINA -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-200 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-slate-900">GINA Standards (Asthma)</h3>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">Global Initiative for Asthma</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Emphasizes documented expiratory airflow limitation and significant bronchodilator reversibility:
+                    </p>
+                    <ul class="space-y-2 text-xs text-slate-700">
+                        <li>&#8226; <strong>Reversibility Positive:</strong> An increase in $FEV_1$ or $FVC$ by $> 12\%$ and $> 200\text{ mL}$ from baseline 10–15 minutes post-bronchodilator administration.</li>
+                        <li>&#8226; <strong>Variability Assessment:</strong> Monitoring excessive daily peak expiratory flow (PEF) fluctuations to confirm bronchial hyperresponsiveness.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#0f223d] text-slate-400 py-12 px-6 border-t border-slate-900 mt-20">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-sm">
+                <p class="font-bold text-white">DirectCare Pulmonary Diagnostics LLC</p>
+                <p class="text-xs text-slate-500 mt-1">5537 State Route 508, Bellefontaine, OH 43311</p>
+                <p class="text-xs text-slate-500">Direct: (502) 812-8457 | robert.beaty@directcarepulm.com</p>
+            </div>
+            <div class="flex space-x-6 text-sm">
+                <a href="index.html" class="hover:text-[#208882] transition">Home</a>
+                <a href="technology.html" class="hover:text-[#208882] transition">Technology</a>
+                <a href="practices.html" class="hover:text-[#208882] transition">For Practices</a>
+                <a href="provider.html" class="hover:text-[#208882] transition">Providers</a>
+                <a href="protocols.html" class="hover:text-[#208882] transition">Protocols</a>
+                <a href="osha.html" class="hover:text-[#208882] transition">OSHA</a>
+                <a href="about.html" class="hover:text-[#208882] transition">About</a>
+                <a href="contact.html" class="hover:text-[#208882] transition">Contact</a>
+            </div>
+            <div class="text-xs text-slate-500 text-center md:text-right">&copy; 2026 DirectCare. SDVOSB Certified.</div>
         </div>
     </footer>
-
 </body>
 </html>
