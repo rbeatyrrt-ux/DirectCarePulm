@@ -5,21 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DirectCare Pulmonary Diagnostics LLC | Mobile PFT Services</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Tab switching logic for seamless single-page multi-tab experience
-        function switchTab(tabId) {
-            const tabs = ['home', 'about', 'technology', 'practices', 'contact'];
-            tabs.forEach(t => {
-                document.getElementById('content-' + t).classList.add('hidden');
-                document.getElementById('nav-' + t).classList.remove('text-teal-400', 'border-b-2', 'border-teal-400');
-                document.getElementById('nav-' + t).classList.add('text-slate-300');
-            });
-            document.getElementById('content-' + tabId).classList.remove('hidden');
-            document.getElementById('nav-' + tabId).classList.add('text-teal-400', 'border-b-2', 'border-teal-400');
-            document.getElementById('nav-' + tabId).classList.remove('text-slate-300');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    </script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
@@ -37,10 +22,10 @@
         </div>
     </div>
 
-    <!-- HEADER / NAVIGATION TABS -->
+    <!-- HEADER / NAVIGATION -->
     <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+            <a href="index.html" class="flex items-center space-x-3">
                 <!-- LOGO PLACEHOLDER: Insert your logo image file here when ready -->
                 <div class="border-2 border-dashed border-slate-600 px-3 py-1 rounded text-xs text-slate-400 bg-slate-800/50">
                     [ Logo Placeholder ]
@@ -49,88 +34,83 @@
                     <span class="text-xl font-extrabold tracking-tight text-teal-400">DirectCare</span>
                     <span class="text-xs uppercase tracking-widest text-slate-400 block sm:inline sm:pl-2">Pulmonary Diagnostics LLC</span>
                 </div>
-            </div>
+            </a>
             
-            <!-- TABS NAVIGATION -->
-            <nav class="flex flex-wrap justify-center gap-1 sm:gap-6 text-sm font-semibold">
-                <button onclick="switchTab('home')" id="nav-home" class="px-3 py-2 text-teal-400 border-b-2 border-teal-400 transition">Home</button>
-                <button onclick="switchTab('about')" id="nav-about" class="px-3 py-2 text-slate-300 hover:text-teal-400 transition">Provider Info & About</button>
-                <button onclick="switchTab('technology')" id="nav-technology" class="px-3 py-2 text-slate-300 hover:text-teal-400 transition">Technology (MiniBox+)</button>
-                <button onclick="switchTab('practices')" id="nav-practices" class="px-3 py-2 text-slate-300 hover:text-teal-400 transition">For Practice Managers</button>
-                <button onclick="switchTab('contact')" id="nav-contact" class="px-3 py-2 text-slate-300 hover:text-teal-400 transition">Contact & Demo</button>
+            <!-- MULTI-PAGE NAVIGATION -->
+            <nav class="flex flex-wrap justify-center gap-6 text-sm font-semibold">
+                <a href="index.html" class="text-teal-400 border-b-2 border-teal-400 transition pb-1">Home</a>
+                <a href="#about" class="text-slate-300 hover:text-teal-400 transition pb-1">About</a>
+                <a href="technology.html" class="text-slate-300 hover:text-teal-400 transition pb-1">Technology</a>
+                <a href="practices.html" class="text-slate-300 hover:text-teal-400 transition pb-1">For Practices & Pricing</a>
+                <a href="#contact" class="text-slate-300 hover:text-teal-400 transition pb-1">Contact</a>
             </nav>
         </div>
     </header>
 
-    <!-- MAIN CONTAINER FOR TABS -->
-    <main class="min-h-screen">
+    <!-- MAIN HOMEPAGE CONTENT -->
+    <main>
 
-        <!-- ================= TAB 1: HOME ================= -->
-        <div id="content-home" class="block">
-            <!-- HERO -->
-            <section class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 px-6">
-                <div class="max-w-5xl mx-auto text-center">
-                    <span class="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6">
-                        Veteran-Owned Mobile Healthcare Innovation
-                    </span>
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-                        Hospital-Grade Pulmonary Testing <br><span class="text-teal-400">Directly in Your Practice Exam Rooms.</span>
-                    </h1>
-                    <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
-                        Eliminating rural travel barriers across West Central and Northwest Ohio. We bring advanced gasless lung volumes, spirometry, and DLCO testing straight to independent primary care clinics with zero capital outlay.
-                    </p>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4">
-                        <button onclick="switchTab('contact')" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg text-center">
-                            Request a PFT Clinic Day
-                        </button>
-                        <button onclick="switchTab('technology')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-8 py-3.5 rounded-xl transition text-center">
-                            Explore the MiniBox+ Tech
-                        </button>
+        <!-- HERO SECTION -->
+        <section class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 px-6">
+            <div class="max-w-5xl mx-auto text-center">
+                <span class="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6">
+                    Veteran-Owned Mobile Healthcare Innovation
+                </span>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+                    Hospital-Grade Pulmonary Testing <br><span class="text-teal-400">Directly in Your Practice Exam Rooms.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+                    Eliminating rural travel barriers across West Central and Northwest Ohio. We bring advanced gasless lung volumes, spirometry, and DLCO testing straight to independent primary care clinics with zero capital outlay.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#contact" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg text-center">
+                        Request a PFT Clinic Day
+                    </a>
+                    <a href="technology.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-8 py-3.5 rounded-xl transition text-center">
+                        Explore the MiniBox+ Tech
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- RURAL HEALTH GAP / ROBUST STATS -->
+        <section class="py-20 bg-white border-b border-slate-200 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span class="text-teal-600 font-bold text-sm uppercase tracking-widest">The Regional Challenge</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Bridging the Diagnostic Gap in Ohio</h2>
+                    <p class="text-slate-600 text-sm mt-3">Independent primary care providers face severe logistical roadblocks when trying to get specialized respiratory diagnostics for vulnerable rural patients.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
+                        <div class="text-4xl font-extrabold text-teal-600 mb-3">8.0% vs 5.0%</div>
+                        <h3 class="font-bold text-slate-900 mb-2">Elevated COPD Prevalence</h3>
+                        <p class="text-sm text-slate-600">Rural communities face heavy chronic respiratory burdens driven by agricultural dust and industrial exposures.</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
+                        <div class="text-4xl font-extrabold text-teal-600 mb-3">35% – 45%</div>
+                        <h3 class="font-bold text-slate-900 mb-2">Non-Attendance Rate</h3>
+                        <p class="text-sm text-slate-600">Documented drop-off when elderly or low-income patients are forced to travel 45–90 minutes to distant hospital PFT labs.</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
+                        <div class="text-4xl font-extrabold text-teal-600 mb-3">$0 Capital</div>
+                        <h3 class="font-bold text-slate-900 mb-2">Zero Equipment Cost</h3>
+                        <p class="text-sm text-slate-600">We provide the hardware, certified RRT clinician, and consumables. Your practice unlocks immediate ancillary revenue.</p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- RURAL HEALTH GAP / ROBUST STATS -->
-            <section class="py-20 bg-white border-b border-slate-200 px-6">
-                <div class="max-w-6xl mx-auto">
-                    <div class="text-center max-w-2xl mx-auto mb-16">
-                        <span class="text-teal-600 font-bold text-sm uppercase tracking-widest">The Regional Challenge</span>
-                        <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Bridging the Diagnostic Gap in Ohio</h2>
-                        <p class="text-slate-600 text-sm mt-3">Independent primary care providers face severe logistical roadblocks when trying to get specialized respiratory diagnostics for vulnerable rural patients.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
-                            <div class="text-4xl font-extrabold text-teal-600 mb-3">8.0% vs 5.0%</div>
-                            <h3 class="font-bold text-slate-900 mb-2">Elevated COPD Prevalence</h3>
-                            <p class="text-sm text-slate-600">Rural communities face heavy chronic respiratory burdens driven by agricultural dust and industrial exposures.</p>
-                        </div>
-                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
-                            <div class="text-4xl font-extrabold text-teal-600 mb-3">35% – 45%</div>
-                            <h3 class="font-bold text-slate-900 mb-2">Non-Attendance Rate</h3>
-                            <p class="text-sm text-slate-600">Documented drop-off when elderly or low-income patients are forced to travel 45–90 minutes to distant hospital PFT labs.</p>
-                        </div>
-                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
-                            <div class="text-4xl font-extrabold text-teal-600 mb-3">$0 Capital</div>
-                            <h3 class="font-bold text-slate-900 mb-2">Zero Equipment Cost</h3>
-                            <p class="text-sm text-slate-600">We provide the hardware, certified RRT clinician, and consumables. Your practice unlocks immediate ancillary revenue.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-
-        <!-- ================= TAB 2: PROVIDER INFO & ABOUT ================= -->
-        <div id="content-about" class="hidden py-16 px-6 max-w-5xl mx-auto">
+        <!-- ABOUT / FOUNDER SECTION -->
+        <section id="about" class="py-20 px-6 max-w-5xl mx-auto">
             <div class="text-center mb-12">
                 <span class="text-teal-600 font-bold text-xs uppercase tracking-widest">Clinical Leadership</span>
-                <h1 class="text-4xl font-extrabold text-slate-900 mt-2">About the Founder</h1>
+                <h2 class="text-4xl font-extrabold text-slate-900 mt-2">About the Founder</h2>
                 <p class="text-slate-600 mt-2">Driven by military precision, clinical excellence, and a deep commitment to rural healthcare access.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-start bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm">
                 <div class="text-center md:text-left">
-                    <!-- PLACEHOLDER OR HEADSHOT CONTAINER -->
                     <div class="w-48 h-48 mx-auto md:mx-0 rounded-2xl bg-slate-200 border-2 border-dashed border-slate-400 overflow-hidden flex items-center justify-center text-slate-500 font-medium text-xs mb-4">
                         [ Insert Headshot Here ]
                     </div>
@@ -159,92 +139,13 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-
-        <!-- ================= TAB 3: TECHNOLOGY ================= -->
-        <div id="content-technology" class="hidden py-16 px-6 max-w-5xl mx-auto">
-            <div class="text-center mb-12">
-                <span class="text-teal-600 font-bold text-xs uppercase tracking-widest">State-of-the-Art Equipment</span>
-                <h1 class="text-4xl font-extrabold text-slate-900 mt-2">The PulmOne MiniBox+ Advantage</h1>
-                <p class="text-slate-600 mt-2">Revolutionizing pulmonary function testing by removing cumbersome 600-pound hospital body boxes.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Gasless Lung Volumes in 60 Seconds</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
-                        Traditional hospital labs rely on heavy nitrogen washout or helium dilution tanks. The MiniBox+ utilizes advanced aerodynamic plethysmography to capture complete Total Lung Capacity (TLC), Functional Residual Capacity (FRC), and Residual Volume (RV) through calm tidal breathing.
-                    </p>
-                    <p class="text-slate-600 text-sm leading-relaxed">
-                        Compact enough for standard tabletop placement, our mobile setup requires zero permanent facility modification.
-                    </p>
-                </div>
-                <div class="bg-slate-200 border-2 border-dashed border-slate-300 rounded-2xl h-72 flex items-center justify-center text-slate-500 font-medium text-sm">
-                    [ Insert MiniBox+ Photo / Graphic Here ]
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 mb-2 text-lg text-teal-700">Complete Suite</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Performs pre/post bronchodilator spirometry, single-breath DLCO diffusion, and gasless lung volumes strictly adhering to ATS/ERS standards.</p>
-                </div>
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 mb-2 text-lg text-teal-700">Superior Safety</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Utilizes single-use, 0.025-micron inline viral/bacterial filter mouthpieces ensuring >99.999% bioburden protection for every patient.</p>
-                </div>
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 mb-2 text-lg text-teal-700">Rapid Turnaround</h4>
-                    <p class="text-xs text-slate-600 leading-relaxed">Encrypted diagnostic reports accompanied by board-certified pulmonologist overreads delivered securely into your EMR within 24 to 48 hours.</p>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- ================= TAB 4: FOR PRACTICE MANAGERS ================= -->
-        <div id="content-practices" class="hidden py-16 px-6 max-w-5xl mx-auto">
-            <div class="text-center mb-12">
-                <span class="text-teal-600 font-bold text-xs uppercase tracking-widest">Seamless Integration</span>
-                <h1 class="text-4xl font-extrabold text-slate-900 mt-2">Designed for Office Efficiency</h1>
-                <p class="text-slate-600 mt-2">Enhance patient retention and unlock ancillary revenue without adding administrative burden.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                    <div class="text-teal-600 font-bold text-lg mb-3">For Practice Managers & Staff</div>
-                    <ul class="space-y-3 text-sm text-slate-600">
-                        <li><strong>Zero Billing Friction:</strong> Your practice bills commercial payers, Medicare, or Medicaid under your own NPI for global CPT codes.</li>
-                        <li><strong>Zero Staff Burden:</strong> We bring the equipment, the RRT clinician, and all single-use consumables. Your team simply books patients into a scheduled half-day block.</li>
-                        <li><strong>Secure EMR Delivery:</strong> HIPAA-compliant PDF reports dropped directly into your secure portal or email inbox.</li>
-                    </ul>
-                </div>
-
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                    <div class="text-teal-600 font-bold text-lg mb-3">For Physicians & Clinicians</div>
-                    <ul class="space-y-3 text-sm text-slate-600">
-                        <li><strong>Retain Patient Care:</strong> Keep chronic respiratory patients inside your medical home instead of losing them to distant hospital networks.</li>
-                        <li><strong>Ancillary Revenue:</strong> Capture significant net margins (~$75 to $110 per completed test suite) from insurance reimbursements with zero equipment lease fees.</li>
-                        <li><strong>Quality Diagnostics:</strong> Trust hospital-grade data interpreted by board-certified pulmonologists.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="bg-slate-900 text-white p-8 rounded-3xl text-center">
-                <h3 class="text-xl font-bold mb-3">Flexible Partnership Models</h3>
-                <p class="text-slate-300 text-sm max-w-2xl mx-auto mb-6">Whether traditional Fee-for-Service partnerships, Direct Primary Care (DPC) wholesale packages, or industrial OSHA respirator clearances, we tailor our schedule to your clinic.</p>
-                <button onclick="switchTab('contact')" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-6 py-3 rounded-xl transition text-sm">
-                    Schedule a Practice Consultation
-                </button>
-            </div>
-        </div>
-
-
-        <!-- ================= TAB 5: CONTACT & DEMO ================= -->
-        <div id="content-contact" class="hidden py-16 px-6 max-w-4xl mx-auto">
+        <!-- CONTACT & DEMO SECTION -->
+        <section id="contact" class="py-20 px-6 max-w-4xl mx-auto">
             <div class="text-center mb-12">
                 <span class="text-teal-600 font-bold text-xs uppercase tracking-widest">Get in Touch</span>
-                <h1 class="text-4xl font-extrabold text-slate-900 mt-2">Schedule Your Practice Demo</h1>
+                <h2 class="text-4xl font-extrabold text-slate-900 mt-2">Schedule Your Practice Demo</h2>
                 <p class="text-slate-600 mt-2">Ready to offer in-house pulmonary function testing with zero capital risk? Contact Robert Beaty directly.</p>
             </div>
 
@@ -303,7 +204,7 @@
                     </form>
                 </div>
             </div>
-        </div>
+        </section>
 
     </main>
 
@@ -316,11 +217,11 @@
                 <p class="text-xs text-slate-500">Direct: (502) 812-8457 | robert.beaty@directcarepulm.com</p>
             </div>
             <div class="flex space-x-6 text-sm">
-                <button onclick="switchTab('home')" class="hover:text-teal-400 transition">Home</button>
-                <button onclick="switchTab('about')" class="hover:text-teal-400 transition">About</button>
-                <button onclick="switchTab('technology')" class="hover:text-teal-400 transition">Technology</button>
-                <button onclick="switchTab('practices')" class="hover:text-teal-400 transition">For Practices</button>
-                <button onclick="switchTab('contact')" class="hover:text-teal-400 transition">Contact</button>
+                <a href="index.html" class="hover:text-teal-400 transition">Home</a>
+                <a href="#about" class="hover:text-teal-400 transition">About</a>
+                <a href="technology.html" class="hover:text-teal-400 transition">Technology</a>
+                <a href="practices.html" class="hover:text-teal-400 transition">For Practices</a>
+                <a href="#contact" class="hover:text-teal-400 transition">Contact</a>
             </div>
             <div class="text-xs text-slate-500 text-center md:text-right">
                 &copy; 2026 DirectCare. SDVOSB Certified. All rights reserved.
