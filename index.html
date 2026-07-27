@@ -4,32 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DirectCare Pulmonary Diagnostics LLC | Mobile PFT Services</title>
-    <!-- Tailwind CSS CDN for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
-    <!-- HEADER / NAVIGATION -->
-    <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md">
+    <!-- NAVIGATION BAR -->
+    <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <span class="text-xl font-extrabold tracking-tight text-teal-400">DirectCare</span>
+            <a href="index.html" class="flex items-center space-x-3">
+                <!-- LOGO PLACEHOLDER: Replace src with your actual logo file name once ready -->
+                <img src="logo.png" alt="DirectCare Logo" class="h-9 w-auto max-h-10 object-contain hidden" id="site-logo">
+                <span class="text-xl font-extrabold tracking-tight text-teal-400" id="logo-fallback">DirectCare</span>
                 <span class="text-xs uppercase tracking-widest text-slate-400 border-l border-slate-700 pl-3 hidden sm:inline">Pulmonary Diagnostics LLC</span>
-            </div>
+            </a>
             <nav class="hidden md:flex space-x-8 text-sm font-medium">
-                <a href="#services" class="hover:text-teal-400 transition">Services</a>
-                <a href="#technology" class="hover:text-teal-400 transition">Technology</a>
-                <a href="#benefits" class="hover:text-teal-400 transition">For Practices</a>
-                <a href="#contact" class="hover:text-teal-400 transition">Contact</a>
+                <a href="index.html" class="text-teal-400 transition">Home</a>
+                <a href="technology.html" class="hover:text-teal-400 transition">Technology</a>
+                <a href="practices.html" class="hover:text-teal-400 transition">For Practices</a>
+                <a href="contact.html" class="hover:text-teal-400 transition">Contact & Demo</a>
             </nav>
-            <a href="#contact" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow">
+            <a href="contact.html" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow">
                 Schedule a Demo
             </a>
         </div>
     </header>
 
     <!-- HERO SECTION -->
-    <section class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-20 px-6">
+    <section class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 px-6">
         <div class="max-w-5xl mx-auto text-center">
             <span class="bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6">
                 Service-Disabled Veteran-Owned Small Business (SDVOSB)
@@ -41,104 +42,60 @@
                 Eliminating rural travel barriers across West Central Ohio. We bring advanced gasless lung volumes, spirometry, and DLCO testing straight to your clinic with zero capital outlay.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#contact" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg text-center">
+                <a href="contact.html" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg text-center">
                     Request a PFT Clinic Day
                 </a>
-                <a href="#technology" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-8 py-3.5 rounded-xl transition text-center">
+                <a href="technology.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-8 py-3.5 rounded-xl transition text-center">
                     Explore the Technology
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- KEY STATS / RURAL GAP -->
-    <section class="py-16 bg-white border-b border-slate-200 px-6">
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm">
-                <div class="text-3xl font-extrabold text-teal-600 mb-2">8.0% vs 5.0%</div>
-                <h3 class="font-bold text-slate-900 mb-1">Elevated COPD Prevalence</h3>
-                <p class="text-sm text-slate-600">Rural communities face higher chronic respiratory burdens due to agricultural and dust exposures.</p>
+    <!-- RURAL HEALTH GAP STATS -->
+    <section class="py-20 bg-white border-b border-slate-200 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-teal-600 font-bold text-sm uppercase tracking-widest">The Regional Challenge</span>
+                <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Bridging the Diagnostic Gap in West Central Ohio</h2>
             </div>
-            <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm">
-                <div class="text-3xl font-extrabold text-teal-600 mb-2">35% – 45%</div>
-                <h3 class="font-bold text-slate-900 mb-1">Non-Attendance Rate</h3>
-                <p class="text-sm text-slate-600">Observed when elderly or low-income patients are forced to drive 45–90 minutes to urban hospital labs.</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm">
-                <div class="text-3xl font-extrabold text-teal-600 mb-2">$0 Capital</div>
-                <h3 class="font-bold text-slate-900 mb-1">Zero Equipment Cost</h3>
-                <p class="text-sm text-slate-600">We provide the hardware, certified RRT clinician, and consumables. You generate clean ancillary revenue.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- TECHNOLOGY SECTION -->
-    <section id="technology" class="py-20 px-6 bg-slate-50">
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-                <span class="text-teal-600 font-bold text-sm tracking-widest uppercase">Advanced Engineering</span>
-                <h2 class="text-3xl font-extrabold text-slate-900 mt-2 mb-6">The PulmOne MiniBox+ Advantage</h2>
-                <p class="text-slate-600 mb-6 leading-relaxed">
-                    Traditional hospital labs rely on cumbersome 600-pound body boxes and heavy gas cylinders. DirectCare deploys the state-of-the-art tabletop MiniBox+ directly into your office workflow.
-                </p>
-                <ul class="space-y-4">
-                    <li class="flex items-start">
-                        <svg class="w-6 h-6 text-teal-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        <div><strong class="text-slate-900">Gasless Lung Volumes:</strong> Captures complete TLC, FRC, and RV via aerodynamic plethysmography in just 60 seconds.</div>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-6 h-6 text-teal-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        <div><strong class="text-slate-900">Complete Diagnostic Suite:</strong> Pre/post bronchodilator spirometry and single-breath DLCO diffusion meeting strict ATS/ERS standards.</div>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-6 h-6 text-teal-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        <div><strong class="text-slate-900">Rapid Turnaround:</strong> Board-certified 1099 pulmonologist overreads delivered securely into your EMR within 24 to 48 hours.</div>
-                    </li>
-                </ul>
-            </div>
-            <div class="bg-blue-900 text-white p-8 rounded-3xl shadow-xl border border-blue-800">
-                <h3 class="text-xl font-bold mb-4 text-teal-300">Designed for Office Efficiency</h3>
-                <p class="text-slate-300 text-sm mb-6 leading-relaxed">
-                    Operated under the expert supervision of a master's-prepared Healthcare Administrator and former U.S. Army Supervisory Respiratory Therapist (RRT).
-                </p>
-                <div class="space-y-4 border-t border-blue-800/60 pt-6">
-                    <div>
-                        <div class="font-semibold text-white">For Practice Managers:</div>
-                        <p class="text-xs text-slate-300 mt-1">Zero billing friction. Your practice bills global codes under your own NPI; we invoice a simple turnkey package fee.</p>
-                    </div>
-                    <div>
-                        <div class="font-semibold text-white">For Physicians:</div>
-                        <p class="text-xs text-slate-300 mt-1">Keep chronic respiratory care local, retain patient continuity, and unlock high net margins (~$75–$110 per suite).</p>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
+                    <div class="text-4xl font-extrabold text-teal-600 mb-3">8.0% vs 5.0%</div>
+                    <h3 class="font-bold text-slate-900 mb-2">Elevated COPD Prevalence</h3>
+                    <p class="text-sm text-slate-600">Rural communities face higher chronic respiratory burdens due to agricultural dust and industrial exposures.</p>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CONTACT / CALL TO ACTION -->
-    <section id="contact" class="py-20 bg-slate-900 text-white px-6">
-        <div class="max-w-4xl mx-auto bg-slate-800 border border-slate-700 rounded-3xl p-8 md:p-12 shadow-2xl text-center">
-            <h2 class="text-3xl font-extrabold mb-4">Partner With DirectCare Today</h2>
-            <p class="text-slate-300 max-w-xl mx-auto mb-8 text-sm leading-relaxed">
-                Bring hospital-grade pulmonary testing to your patients without capital risk. Schedule a 15-minute clinical demonstration of the MiniBox+ in your office.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-6 text-sm">
-                <div class="flex items-center space-x-2 text-slate-300">
-                    <span class="font-bold text-teal-400">Phone:</span> (937) 555-0198
+                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
+                    <div class="text-4xl font-extrabold text-teal-600 mb-3">35% – 45%</div>
+                    <h3 class="font-bold text-slate-900 mb-2">Non-Attendance Rate</h3>
+                    <p class="text-sm text-slate-600">Observed when elderly or low-income patients are forced to drive 45–90 minutes to urban hospital labs.</p>
                 </div>
-                <div class="flex items-center space-x-2 text-slate-300">
-                    <span class="font-bold text-teal-400">Email:</span> DirectCarePulmonary@gmail.com
-                </div>
-                <div class="flex items-center space-x-2 text-slate-300">
-                    <span class="font-bold text-teal-400">Base:</span> Bellefontaine, OH 43311
+                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm text-center">
+                    <div class="text-4xl font-extrabold text-teal-600 mb-3">$0 Capital</div>
+                    <h3 class="font-bold text-slate-900 mb-2">Zero Equipment Cost</h3>
+                    <p class="text-sm text-slate-600">We provide the hardware, certified RRT clinician, and consumables. Your practice retains clean ancillary revenue.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-slate-950 text-slate-500 py-8 px-6 text-xs text-center border-t border-slate-900">
-        <p>&copy; 2026 DirectCare Pulmonary Diagnostics LLC. All rights reserved. Service-Disabled Veteran-Owned Small Business (SDVOSB).</p>
+    <footer class="bg-slate-950 text-slate-400 py-12 px-6 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-sm">
+                <p class="font-bold text-white">DirectCare Pulmonary Diagnostics LLC</p>
+                <p class="text-xs text-slate-500 mt-1">5537 State Route 508, Bellefontaine, OH 43311</p>
+            </div>
+            <div class="flex space-x-6 text-sm">
+                <a href="index.html" class="hover:text-teal-400 transition">Home</a>
+                <a href="technology.html" class="hover:text-teal-400 transition">Technology</a>
+                <a href="practices.html" class="hover:text-teal-400 transition">For Practices</a>
+                <a href="contact.html" class="hover:text-teal-400 transition">Contact</a>
+            </div>
+            <div class="text-xs text-slate-500 text-center md:text-right">
+                &copy; 2026 DirectCare. SDVOSB Certified.
+            </div>
+        </div>
     </footer>
 
 </body>
