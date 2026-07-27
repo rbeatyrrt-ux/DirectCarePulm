@@ -5,26 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DirectCare Pulmonary Diagnostics LLC | Mobile PFT Services</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>.blend-logo { mix-blend-mode: multiply; }</style>
+    <style>
+        .blend-logo {
+            mix-blend-mode: multiply;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
-    <!-- TOP BAR -->
-    <div class="bg-[#0f223d] text-slate-200 text-xs py-2 px-6 border-b border-slate-800">
+    <!-- TOP ANNOUNCEMENT BAR -->
+    <div class="bg-[#0f223d] text-slate-200 text-xs py-2.5 px-6 border-b border-slate-800">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-            <span>SDVOSB Certified &bull; West Central & Northwest Ohio Corridor</span>
-            <a href="tel:5028128457" class="hover:text-[#208882] transition">&#9743; (502) 812-8457</a>
+            <div class="flex items-center space-x-2">
+                <span class="bg-[#208882] text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">SDVOSB Certified</span>
+                <span>Service-Disabled Veteran-Owned Small Business &bull; West Central & Northwest Ohio Corridor</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="tel:5028128457" class="hover:text-[#208882] transition font-medium">&#9743; (502) 812-8457</a>
+                <a href="mailto:robert.beaty@directcarepulm.com" class="hover:text-[#208882] transition font-medium">&#9993; robert.beaty@directcarepulm.com</a>
+            </div>
         </div>
     </div>
 
-    <!-- NARROW HEADER -->
+    <!-- UNIFIED HEADER & BANNER WITH RESTORED LARGE LOGO -->
     <header class="sticky top-0 z-50 bg-white shadow-md border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-6 py-2 md:py-3 flex flex-col items-center gap-2">
+        <div class="max-w-7xl mx-auto px-6 py-4 md:py-6 flex flex-col items-center gap-4">
             <a href="index.html" class="flex justify-center">
-                <img src="logo.png" alt="DirectCare Logo" class="h-20 md:h-24 w-auto object-contain blend-logo">
+                <img src="logo.png" alt="DirectCare Pulmonary Diagnostics Logo" class="h-36 md:h-48 w-auto object-contain blend-logo">
             </a>
-            <nav class="w-full border-t border-slate-100 pt-2 flex flex-wrap justify-center gap-6 md:gap-8 text-sm font-semibold">
-                <a href="index.html" class="text-[#208882] border-b-2 border-[#208882] pb-1">Home</a>
+            
+            <nav class="w-full border-t border-slate-100 pt-3 flex flex-wrap justify-center gap-6 md:gap-8 text-sm font-semibold">
+                <a href="index.html" class="text-[#208882] border-b-2 border-[#208882] transition pb-1">Home</a>
                 <a href="technology.html" class="text-slate-700 hover:text-[#208882] transition pb-1">Technology (MiniBox+)</a>
                 <a href="practices.html" class="text-slate-700 hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
                 <a href="osha.html" class="text-slate-700 hover:text-[#208882] transition pb-1">OSHA Compliance</a>
@@ -34,61 +45,68 @@
         </div>
     </header>
 
-    <!-- HERO SECTION -->
-    <section class="bg-gradient-to-br from-[#0f223d] via-[#1A365D] to-[#0f223d] text-white py-20 px-6 text-center">
-        <span class="bg-[#208882]/30 text-teal-300 border border-[#208882]/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-4">
-            Veteran-Owned Mobile Healthcare Innovation
-        </span>
-        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-            Hospital-Grade Pulmonary Testing <br><span class="text-[#319795]">Directly in Your Practice Exam Rooms.</span>
-        </h1>
-        <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
-            Eliminating rural travel barriers across West Central and Northwest Ohio. We bring advanced gasless lung volumes, spirometry, and DLCO testing straight to independent primary care clinics with zero capital outlay.
-        </p>
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="contact.html" class="bg-[#208882] hover:bg-[#1a706b] text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg text-center">
-                Request a PFT Clinic Day
-            </a>
-            <a href="technology.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-8 py-3.5 rounded-xl transition text-center">
-                Explore the MiniBox+ Tech
-            </a>
-        </div>
-    </section>
+    <!-- MAIN HOMEPAGE CONTENT -->
+    <main>
+        <!-- HERO SECTION -->
+        <section class="bg-gradient-to-br from-[#0f223d] via-[#1A365D] to-[#0f223d] text-white py-24 px-6">
+            <div class="max-w-5xl mx-auto text-center">
+                <span class="bg-[#208882]/30 text-teal-300 border border-[#208882]/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6">
+                    Veteran-Owned Mobile Healthcare Innovation
+                </span>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+                    Hospital-Grade Pulmonary Testing <br><span class="text-[#319795]">Directly in Your Practice Exam Rooms.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+                    Eliminating rural travel barriers across West Central and Northwest Ohio. We bring advanced gasless lung volumes, spirometry, and DLCO testing straight to independent primary care clinics with zero capital outlay.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="contact.html" class="bg-[#208882] hover:bg-[#1a706b] text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg text-center">
+                        Request a PFT Clinic Day
+                    </a>
+                    <a href="technology.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-8 py-3.5 rounded-xl transition text-center">
+                        Explore the MiniBox+ Tech
+                    </a>
+                </div>
+            </div>
+        </section>
 
-    <!-- SOURCED & CITED STATS -->
-    <main class="py-16 px-6 max-w-6xl mx-auto">
-        <div class="text-center max-w-2xl mx-auto mb-16">
-            <span class="text-[#208882] font-bold text-sm uppercase tracking-widest">Evidence-Based Need</span>
-            <h2 class="text-3xl font-extrabold text-slate-900 mt-2">The Rural Respiratory Care Gap</h2>
-            <p class="text-slate-600 text-sm mt-3">Verified federal and public health data underlining the urgent necessity for decentralized pulmonary function testing.</p>
-        </div>
+        <!-- SOURCED & CITED STATS -->
+        <section class="py-20 bg-white border-b border-slate-200 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span class="text-[#208882] font-bold text-sm uppercase tracking-widest">Evidence-Based Need</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900 mt-2">The Rural Respiratory Care Gap</h2>
+                    <p class="text-slate-600 text-sm mt-3">Verified federal and public health data underlining the urgent necessity for decentralized pulmonary function testing.</p>
+                </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="text-4xl font-extrabold text-[#208882] mb-3">8.6%</div>
-                    <h3 class="font-bold text-slate-900 mb-2">High State-Level COPD Burden</h3>
-                    <p class="text-sm text-slate-600 mb-4">Ohio ranks among the top 11 states nationally with the highest chronic obstructive pulmonary disease prevalence.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="text-4xl font-extrabold text-[#208882] mb-3">8.6%</div>
+                            <h3 class="font-bold text-slate-900 mb-2">High State-Level COPD Burden</h3>
+                            <p class="text-sm text-slate-600 mb-4">Ohio ranks among the top 11 states nationally with the highest chronic obstructive pulmonary disease prevalence.</p>
+                        </div>
+                        <div class="text-[11px] text-slate-400 border-t border-slate-200 pt-3">Source: <em>American Lung Association (ALA)</em></div>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="text-4xl font-extrabold text-[#208882] mb-3">Nearly 2x</div>
+                            <h3 class="font-bold text-slate-900 mb-2">Rural vs. Urban Disparity</h3>
+                            <p class="text-sm text-slate-600 mb-4">Age-adjusted COPD prevalence and Medicare hospitalizations escalate sharply in less urbanized rural counties.</p>
+                        </div>
+                        <div class="text-[11px] text-slate-400 border-t border-slate-200 pt-3">Source: <em>CDC MMWR Surveillance</em></div>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="text-4xl font-extrabold text-[#208882] mb-3">24–48 Hr</div>
+                            <h3 class="font-bold text-slate-900 mb-2">Closing the Diagnostic Loop</h3>
+                            <p class="text-sm text-slate-600 mb-4">Eliminating travel barriers prevents diagnostic drop-off and secures timely pulmonologist overreads.</p>
+                        </div>
+                        <div class="text-[11px] text-slate-400 border-t border-slate-200 pt-3">Source: <em>Journal of Rural Health</em></div>
+                    </div>
                 </div>
-                <div class="text-[11px] text-slate-400 border-t border-slate-200 pt-3">Source: <em>American Lung Association (ALA)</em></div>
             </div>
-            <div class="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="text-4xl font-extrabold text-[#208882] mb-3">Nearly 2x</div>
-                    <h3 class="font-bold text-slate-900 mb-2">Rural vs. Urban Disparity</h3>
-                    <p class="text-sm text-slate-600 mb-4">Age-adjusted COPD prevalence and Medicare hospitalizations escalate sharply in less urbanized rural counties.</p>
-                </div>
-                <div class="text-[11px] text-slate-400 border-t border-slate-200 pt-3">Source: <em>CDC MMWR Surveillance</em></div>
-            </div>
-            <div class="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="text-4xl font-extrabold text-[#208882] mb-3">24–48 Hr</div>
-                    <h3 class="font-bold text-slate-900 mb-2">Closing the Diagnostic Loop</h3>
-                    <p class="text-sm text-slate-600 mb-4">Eliminating travel barriers prevents diagnostic drop-off and secures timely pulmonologist overreads.</p>
-                </div>
-                <div class="text-[11px] text-slate-400 border-t border-slate-200 pt-3">Source: <em>Journal of Rural Health</em></div>
-            </div>
-        </div>
+        </section>
     </main>
 
     <!-- FOOTER -->
