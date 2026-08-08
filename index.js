@@ -91,17 +91,7 @@ async function initializeDatabase() {
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_dob DATE;
     `);
 
-    // Automatically ensure an admin user exists with a known temporary password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('Password123!', salt);
-
-    await pool.query(`
-      INSERT INTO users (full_name, email, password_hash, role, credentials, npi, must_change_password)
-      VALUES ('Robert Beaty', 'robert@directcarepulm.com', $1, 'admin', 'RRT, MHA', '1234567890', TRUE)
-      ON CONFLICT (email) DO UPDATE 
-      SET password_hash = EXCLUDED.password_hash, must_change_password = TRUE;
-    `, [hashedPassword]);
-
+    
   } catch (err) {
     console.error("Database initialization check failed:", err);
   }
