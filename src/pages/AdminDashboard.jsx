@@ -170,7 +170,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/requests', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/requests', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -184,7 +184,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   const fetchAuditRequests = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/audit/requests', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/audit/requests', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -196,7 +196,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/users', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -208,7 +208,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   const fetchClinics = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/clinics', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/clinics', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -220,7 +220,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   const fetchSchedules = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/clinic-schedules', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/clinic-schedules', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -234,7 +234,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
     e.preventDefault();
     setClinicMsg('');
     try {
-      const res = await fetch('http://localhost:5000/api/clinics', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/clinics', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -261,7 +261,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   const handleApproveSchedule = async (requestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${requestId}/schedule`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/requests/${requestId}/schedule`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -287,7 +287,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${deletingRequest.request_id}`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/requests/${deletingRequest.request_id}`, {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json',
@@ -357,7 +357,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
     formData.append('signature_pin', rrtSignaturePin);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${selectedUploadRequest.request_id}/preliminary`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/requests/${selectedUploadRequest.request_id}/preliminary`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -388,7 +388,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
     e.preventDefault();
     setUserMsg('');
     try {
-      const res = await fetch('http://localhost:5000/api/users', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/users', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -421,7 +421,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
     e.preventDefault();
     if (!editingUser) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${editingUser.user_id}`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/users/${editingUser.user_id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -451,7 +451,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
   const handleDeleteUser = async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user account?')) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -505,7 +505,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
         throw new Error("Please select at least one custom date or a valid recurring date range.");
       }
 
-      const res = await fetch('http://localhost:5000/api/clinic-schedules', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/clinic-schedules', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -536,7 +536,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   const downloadPdf = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${id}/pdf`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/requests/${id}/pdf`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to generate PDF');

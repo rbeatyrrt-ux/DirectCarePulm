@@ -113,7 +113,7 @@ export default function RrtDashboard({ token, user, onLogout }) {
 
   const checkProfileStatus = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/me', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/requests', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -128,7 +128,7 @@ export default function RrtDashboard({ token, user, onLogout }) {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/requests', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/requests', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -188,7 +188,7 @@ export default function RrtDashboard({ token, user, onLogout }) {
     formData.append('signature_pin', rrtSignaturePin);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${selectedUploadRequest.request_id}/preliminary`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/requests/${selectedUploadRequest.request_id}/preliminary`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -216,7 +216,7 @@ export default function RrtDashboard({ token, user, onLogout }) {
 
   const downloadPdf = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${id}/pdf`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/requests/${id}/pdf`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to generate PDF');

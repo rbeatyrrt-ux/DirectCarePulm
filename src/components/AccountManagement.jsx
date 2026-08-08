@@ -15,7 +15,7 @@ export default function AccountManagement({ token, user, onUpdateSuccess }) {
     setSuccess('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/update-credentials', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/auth/update-credentials', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

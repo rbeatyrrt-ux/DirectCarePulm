@@ -38,7 +38,7 @@ export default function PhysicianDashboard({ token, user, onLogout }) {
   // Fetch raw uploaded report PDF as authenticated blob so iframe displays it securely in modal
   useEffect(() => {
     if (selectedRequest && token) {
-      fetch(`http://localhost:5000/api/requests/${selectedRequest.request_id}/raw-report`, {
+      fetch(`https://directcare-backend.onrender.com/api/requests/${selectedRequest.request_id}/raw-report`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => {
@@ -64,7 +64,7 @@ export default function PhysicianDashboard({ token, user, onLogout }) {
 
   const checkProfileStatus = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/me', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/requests', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -79,7 +79,7 @@ export default function PhysicianDashboard({ token, user, onLogout }) {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/requests', {
+      const res = await fetch('https://directcare-backend.onrender.com/api/requests', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -105,7 +105,7 @@ export default function PhysicianDashboard({ token, user, onLogout }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${selectedRequest.request_id}/finalize`, {
+      const res = await fetch(`https://directcare-backend.onrender.com/api/requests/${selectedRequest.request_id}/finalize`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export default function PhysicianDashboard({ token, user, onLogout }) {
   };
 
   const viewPdfInNewTab = (id) => {
-    window.open(`http://localhost:5000/api/requests/${id}/raw-report`, '_blank');
+    window.open(`https://directcare-backend.onrender.com/api/requests/${id}/raw-report`, '_blank');
   };
 
   const addPreset = (text) => {
