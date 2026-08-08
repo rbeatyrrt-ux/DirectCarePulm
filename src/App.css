@@ -1,0 +1,117 @@
+body {
+  margin: 0;
+  background-color: #f4f6f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-header {
+  background-color: #002b5c;
+  color: white;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.portal-main {
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.grid-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 30px;
+}
+
+@media (max-width: 960px) {
+  .grid-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+.widget-card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #2d3748;
+}
+
+.form-control {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  border-color: #002b5c;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 43, 92, 0.1);
+}
+
+.btn-primary-custom {
+  background-color: #002b5c;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-primary-custom:hover {
+  background-color: #001f3f;
+}
+
+.table-custom {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  margin-top: 15px;
+}
+
+.table-custom th {
+  background-color: #f7fafc;
+  color: #4a5568;
+  padding: 12px 10px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.table-custom td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 13px;
+  color: #2d3748;
+}
