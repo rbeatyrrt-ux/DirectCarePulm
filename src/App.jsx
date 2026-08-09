@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminDashboard from './pages/AdminDashboard';
 import ProviderDashboard from './pages/ProviderDashboard';
 import PhysicianDashboard from './pages/PhysicianDashboard';
@@ -12,7 +12,6 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-// ADD THIS HOOK HERE:
   useEffect(() => {
     const handleUnload = () => {
       sessionStorage.clear();
@@ -22,9 +21,6 @@ export default function App() {
       window.removeEventListener('unload', handleUnload);
     };
   }, []);
-
-  const handleLogin = async (e) => {
-    // ... rest of your code
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -90,6 +86,5 @@ export default function App() {
     return <ClinicStaffDashboard token={token} user={user} onLogout={handleLogout} />;
   }
   
-  // Default fallback for providers
   return <ProviderDashboard token={token} user={user} onLogout={handleLogout} />;
 }
