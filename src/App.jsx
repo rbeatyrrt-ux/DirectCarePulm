@@ -6,11 +6,25 @@ import RrtDashboard from './pages/RrtDashboard';
 import ClinicStaffDashboard from './pages/ClinicStaffDashboard';
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+  const [token, setToken] = useState(sessionStorage.getItem('token') || '');
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user')) || null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+// ADD THIS HOOK HERE:
+  useEffect(() => {
+    const handleUnload = () => {
+      sessionStorage.clear();
+    };
+    window.addEventListener('unload', handleUnload);
+    return () => {
+      window.removeEventListener('unload', handleUnload);
+    };
+  }, []);
+
+  const handleLogin = async (e) => {
+    // ... rest of your code
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,8 +40,8 @@ export default function App() {
 
       setToken(data.token);
       setUser(data.user);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      sessionStorage.setItem('token', data.token);
+      sessionStorage.setItem('user', JSON.stringify(data.user));
     } catch (err) {
       setError(err.message);
     }
@@ -36,8 +50,8 @@ export default function App() {
   const handleLogout = () => {
     setToken('');
     setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
   };
 
   if (!token || !user) {
@@ -76,6 +90,6 @@ export default function App() {
     return <ClinicStaffDashboard token={token} user={user} onLogout={handleLogout} />;
   }
   
-  // Default fallback for providers (and any leftover billing accounts you made during testing)
+  // Default fallback for providers
   return <ProviderDashboard token={token} user={user} onLogout={handleLogout} />;
 }
