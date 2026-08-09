@@ -9,6 +9,18 @@
         .blend-logo {
             mix-blend-mode: multiply;
         }
+        /* Custom styling for the interactive simulator */
+        .sim-screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .sim-screen.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
@@ -39,7 +51,7 @@
         <!-- MIDDLE: NAVIGATION LINKS -->
         <nav class="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-700">
             <a href="/" class="hover:text-[#208882] transition pb-1">Home</a>
-            <a href="technology.html" class="hover:text-[#208882] transition pb-1">Technology (MiniBox+)</a>
+            <a href="technology.html" class="hover:text-[#208882] transition pb-1 text-[#208882]">Technology (MiniBox+)</a>
             <a href="practices.html" class="hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
             <a href="provider.html" class="hover:text-[#208882] transition pb-1">For Providers</a>
             <a href="protocols.html" class="hover:text-[#208882] transition pb-1">Protocols & SOPs</a>
@@ -64,7 +76,7 @@
     <!-- MOBILE / TABLET NAVIGATION ROW -->
     <div class="lg:hidden px-6 pb-3 pt-1 border-t border-slate-100 flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-700">
         <a href="/" class="hover:text-[#208882]">Home</a>
-        <a href="technology.html" class="hover:text-[#208882]">Technology</a>
+        <a href="technology.html" class="hover:text-[#208882] text-[#208882]">Technology</a>
         <a href="practices.html" class="hover:text-[#208882]">Practices</a>
         <a href="provider.html" class="hover:text-[#208882]">Providers</a>
         <a href="protocols.html" class="hover:text-[#208882]">Protocols</a>
@@ -78,7 +90,7 @@
             Clinical & Technological Rigor
         </span>
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-            The PulmOne MiniBox+ <span class="text-[#319795]">Cabinless Plethysmography</span>
+            The PulmOne MiniBox+ <br><span class="text-[#319795]">Cabinless Plethysmography</span>
         </h1>
         <p class="text-slate-300 max-w-3xl mx-auto text-base md:text-lg leading-relaxed">
             Eliminating the traditional 600-pound glass body box. Delivering hospital-grade lung volumes, diffusion capacity, and spirometry with uncompromised clinical validity.
@@ -87,6 +99,8 @@
 
     <!-- MAIN VALIDITY CONTENT IN TOTALITY -->
     <main class="py-16 px-6 max-w-5xl mx-auto space-y-16">
+        
+        <!-- THE TECHNOLOGY EXPLANATION -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm">
             <div>
                 <span class="text-[#208882] font-bold text-xs uppercase tracking-widest">Evolution of PFT</span>
@@ -98,9 +112,128 @@
                     The PulmOne MiniBox+ replaces the physical cabin with advanced acoustic and aerodynamic algorithms, capturing true physiological lung volumes through effortless tidal breathing.
                 </p>
             </div>
-            <div class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl h-80 flex flex-col items-center justify-center text-slate-500 text-center p-6">
-                <span class="font-bold text-slate-700 text-base mb-1">[ PulmOne MiniBox+ Unit Photo Slot ]</span>
-                <span class="text-xs text-slate-500">18 lb tabletop device operating seamlessly in standard exam rooms</span>
+            
+            <!-- STATIC IMAGE SLOT -->
+            <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl h-80 flex flex-col items-center justify-center overflow-hidden shadow-inner p-4">
+                <!-- IMPORTANT: Ensure you save a file named 'minibox.jpg' in your root folder -->
+                <img src="minibox.jpg" alt="PulmOne MiniBox+ Device" class="object-contain h-full w-full" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none;" class="text-center text-slate-500">
+                    <span class="font-bold text-slate-700 text-base mb-1">[ Missing 'minibox.jpg' File ]</span>
+                    <br><span class="text-xs">Save the actual MiniBox+ photo as 'minibox.jpg' in your root folder.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FDA & VALIDITY CALLOUT -->
+        <div class="bg-teal-50 border-l-4 border-[#208882] p-6 rounded-r-xl shadow-sm">
+            <h3 class="text-lg font-bold text-[#0f223d] flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#208882]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                FDA 510(k) Cleared & ATS/ERS Validated
+            </h3>
+            <p class="text-sm text-slate-700 mt-2">
+                The MiniBox+ is fully FDA 510(k) cleared. Extensive peer-reviewed clinical validation studies have proven that the device's gasless, cabinless plethysmography yields Total Lung Capacity (TLC) and Residual Volume (RV) data that is statistically equivalent to traditional hospital body boxes, while remaining completely compliant with ATS/ERS standardization.
+            </p>
+        </div>
+
+        <!-- INTERACTIVE SIMULATOR -->
+        <div class="bg-[#0f223d] text-white p-8 md:p-12 rounded-3xl shadow-xl border border-blue-900">
+            <div class="text-center mb-8">
+                <span class="text-teal-400 font-bold text-xs uppercase tracking-widest">Interactive Dashboard</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold mt-2 mb-2">MiniBox+ Diagnostic Simulator</h2>
+                <p class="text-slate-400 text-sm">Experience the real-time clinical data output generated during a mobile PFT session.</p>
+            </div>
+
+            <div class="bg-slate-900 rounded-xl border border-slate-700 p-6 flex flex-col md:flex-row gap-8">
+                <!-- Sim Controls -->
+                <div class="md:w-1/3 flex flex-col gap-4 justify-center">
+                    <button onclick="runSim('spiro')" class="bg-slate-800 hover:bg-slate-700 text-left px-4 py-3 rounded-lg border border-slate-600 transition flex items-center justify-between group">
+                        <span class="font-bold text-slate-200">1. Spirometry (FVC)</span>
+                        <span class="text-teal-400 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+                    </button>
+                    <button onclick="runSim('volumes')" class="bg-slate-800 hover:bg-slate-700 text-left px-4 py-3 rounded-lg border border-slate-600 transition flex items-center justify-between group">
+                        <span class="font-bold text-slate-200">2. Lung Volumes (TLC)</span>
+                        <span class="text-teal-400 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+                    </button>
+                    <button onclick="runSim('dlco')" class="bg-slate-800 hover:bg-slate-700 text-left px-4 py-3 rounded-lg border border-slate-600 transition flex items-center justify-between group">
+                        <span class="font-bold text-slate-200">3. Diffusion (DLCO)</span>
+                        <span class="text-teal-400 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+                    </button>
+                </div>
+                
+                <!-- Sim Display Area -->
+                <div class="md:w-2/3 bg-black rounded-lg border border-slate-800 p-4 h-64 flex items-center justify-center relative overflow-hidden">
+                    
+                    <!-- Default Screen -->
+                    <div id="sim-default" class="sim-screen active text-center">
+                        <div class="text-slate-500 font-mono mb-2">SYSTEM IDLE</div>
+                        <div class="text-xs text-slate-600">Select a diagnostic modality to begin simulation.</div>
+                    </div>
+
+                    <!-- Spiro Screen -->
+                    <div id="sim-spiro" class="sim-screen w-full">
+                        <div class="flex justify-between text-xs font-mono text-teal-400 mb-4 border-b border-slate-800 pb-2">
+                            <span>FLOW-VOLUME LOOP</span>
+                            <span>CPT 94060</span>
+                        </div>
+                        <div class="relative w-full h-32 border-l border-b border-slate-700">
+                            <!-- SVG FVL Path -->
+                            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <path d="M 10 90 C 20 20, 40 10, 50 50 C 60 90, 80 90, 90 90" fill="none" stroke="#2dd4bf" stroke-width="2" class="dash-anim"/>
+                            </svg>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-500 mt-2">
+                            <span>Volume (L)</span>
+                            <span>FVC: 3.42 L (85% Pred) | FEV1: 2.10 L (70% Pred)</span>
+                        </div>
+                    </div>
+
+                    <!-- Volumes Screen -->
+                    <div id="sim-volumes" class="sim-screen w-full">
+                        <div class="flex justify-between text-xs font-mono text-teal-400 mb-4 border-b border-slate-800 pb-2">
+                            <span>AERODYNAMIC PLETHYSMOGRAPHY</span>
+                            <span>CPT 94726</span>
+                        </div>
+                        <div class="flex items-end justify-center h-32 gap-6 pb-2">
+                            <div class="w-16 bg-slate-800 rounded-t border-t border-x border-slate-600 relative flex items-end">
+                                <div class="w-full bg-blue-500/50 h-[80%] rounded-t"></div>
+                                <span class="absolute -top-6 w-full text-center text-xs text-white">TLC</span>
+                            </div>
+                            <div class="w-16 bg-slate-800 rounded-t border-t border-x border-slate-600 relative flex items-end">
+                                <div class="w-full bg-teal-500/50 h-[40%] rounded-t"></div>
+                                <span class="absolute -top-6 w-full text-center text-xs text-white">FRC</span>
+                            </div>
+                            <div class="w-16 bg-slate-800 rounded-t border-t border-x border-slate-600 relative flex items-end">
+                                <div class="w-full bg-rose-500/50 h-[25%] rounded-t"></div>
+                                <span class="absolute -top-6 w-full text-center text-xs text-white">RV</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DLCO Screen -->
+                    <div id="sim-dlco" class="sim-screen w-full">
+                        <div class="flex justify-between text-xs font-mono text-teal-400 mb-4 border-b border-slate-800 pb-2">
+                            <span>SINGLE-BREATH DLCO</span>
+                            <span>CPT 94729</span>
+                        </div>
+                        <div class="w-full h-32 flex flex-col justify-center gap-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-400">Breath Hold Time</span>
+                                <div class="w-2/3 bg-slate-800 h-2 rounded"><div class="bg-teal-400 h-2 rounded w-[95%]"></div></div>
+                                <span class="text-xs text-white font-mono">9.8s</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-400">Alveolar Volume (VA)</span>
+                                <div class="w-2/3 bg-slate-800 h-2 rounded"><div class="bg-blue-400 h-2 rounded w-[75%]"></div></div>
+                                <span class="text-xs text-white font-mono">5.2L</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-400">Adj. DLCO</span>
+                                <div class="w-2/3 bg-slate-800 h-2 rounded"><div class="bg-rose-400 h-2 rounded w-[60%]"></div></div>
+                                <span class="text-xs text-white font-mono">22.4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -114,8 +247,11 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div>
-                        <div class="text-[#208882] font-extrabold text-lg mb-2">1. Gasless Lung Volumes</div>
-                        <h3 class="font-bold text-slate-900 mb-3">TLC, FRC, and RV via Aerodynamics</h3>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-[#208882] font-extrabold text-lg">1. Gasless Lung Volumes</div>
+                            <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded">CPT 94726</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-3">TLC, FRC, and RV</h3>
                         <p class="text-xs text-slate-600 leading-relaxed mb-4">
                             Measures thoracic gas volume and absolute lung capacities in just 60 seconds of calm tidal breathing. Eliminates errors associated with incomplete gas dilution or hyperventilation.
                         </p>
@@ -127,8 +263,11 @@
 
                 <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div>
-                        <div class="text-[#208882] font-extrabold text-lg mb-2">2. Full Spirometry</div>
-                        <h3 class="font-bold text-slate-900 mb-3">Pre/Post Bronchodilator (CPT 94060)</h3>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-[#208882] font-extrabold text-lg">2. Full Spirometry</div>
+                            <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded">CPT 94060</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-3">Pre/Post Bronchodilator</h3>
                         <p class="text-xs text-slate-600 leading-relaxed mb-4">
                             Precise measurement of FVC, FEV1, FEV1/FVC ratios, and forced expiratory flow parameters with automated ATS quality-control feedback.
                         </p>
@@ -140,8 +279,11 @@
 
                 <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div>
-                        <div class="text-[#208882] font-extrabold text-lg mb-2">3. DLCO Diffusion</div>
-                        <h3 class="font-bold text-slate-900 mb-3">Single-Breath Diffusing Capacity</h3>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-[#208882] font-extrabold text-lg">3. DLCO Diffusion</div>
+                            <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded">CPT 94729</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mb-3">Single-Breath Capacity</h3>
                         <p class="text-xs text-slate-600 leading-relaxed mb-4">
                             Quantifies the lungs' ability to transfer gas from alveolar air into pulmonary capillary blood supply for early interstitial and emphysema screening.
                         </p>
@@ -151,30 +293,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="bg-[#0f223d] text-white p-8 md:p-12 rounded-3xl shadow-xl border border-blue-900">
-            <div class="max-w-3xl">
-                <span class="text-teal-400 font-bold text-xs uppercase tracking-widest">Uncompromising Bioburden Protection</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold mt-2 mb-4">Built-in Patient Safety & Infection Control</h2>
-                <p class="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
-                    The MiniBox+ utilizes single-use, disposable 0.025-micron inline viral/bacterial filter mouthpieces that provide greater than **99.999% bioburden filtration efficiency**.
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs md:text-sm text-slate-200">
-                    <div class="flex items-center space-x-2"><span class="text-teal-400 font-bold">&#10003;</span> <span>Zero cross-contamination risk</span></div>
-                    <div class="flex items-center space-x-2"><span class="text-teal-400 font-bold">&#10003;</span> <span>Meets CDC ambulatory guidelines</span></div>
-                    <div class="flex items-center space-x-2"><span class="text-teal-400 font-bold">&#10003;</span> <span>Calibrated under RRT supervision</span></div>
-                    <div class="flex items-center space-x-2"><span class="text-teal-400 font-bold">&#10003;</span> <span>Pulmonologist 24–48 hr overreads</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 p-8 rounded-3xl text-center shadow-sm">
-            <h3 class="text-2xl font-extrabold text-slate-900 mb-3">Experience the Technology Firsthand</h3>
-            <p class="text-slate-600 text-sm max-w-xl mx-auto mb-6">Let us bring the MiniBox+ to your clinic for a live demonstration.</p>
-            <a href="contact.html" class="inline-block bg-[#208882] hover:bg-[#1a706b] text-white font-bold px-8 py-3.5 rounded-xl transition shadow text-sm">
-                Request a Practice Demo
-            </a>
         </div>
     </main>
 
@@ -197,5 +315,15 @@
             <div class="text-xs text-slate-500 text-center md:text-right">&copy; 2026 DirectCare. SDVOSB Certified.</div>
         </div>
     </footer>
+
+    <!-- SIMULATOR SCRIPT -->
+    <script>
+        function runSim(type) {
+            // Hide all screens
+            document.querySelectorAll('.sim-screen').forEach(el => el.classList.remove('active'));
+            // Show target screen
+            document.getElementById('sim-' + type).classList.add('active');
+        }
+    </script>
 </body>
 </html>
