@@ -34,11 +34,11 @@
 
             <!-- MIDDLE: NAVIGATION LINKS -->
             <nav class="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-700">
-                <a href="/" class="hover:text-[#208882] transition pb-1 text-[#208882]">Home</a>
+                <a href="/" class="hover:text-[#208882] transition pb-1">Home</a>
                 <a href="technology.html" class="hover:text-[#208882] transition pb-1">Technology (MiniBox+)</a>
                 <a href="practices.html" class="hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
                 <a href="provider.html" class="hover:text-[#208882] transition pb-1">For Providers</a>
-                <a href="protocols.html" class="hover:text-[#208882] transition pb-1">Protocols & SOPs</a>
+                <a href="protocols.html" class="hover:text-[#208882] transition pb-1 text-[#208882]">Protocols & SOPs</a>
                 <a href="osha.html" class="hover:text-[#208882] transition pb-1">OSHA Compliance</a>
             </nav>
 
@@ -57,13 +57,13 @@
 
         </div>
 
-        <!-- MOBILE / TABLET NAVIGATION ROW (Shows on smaller screens if needed) -->
+        <!-- MOBILE / TABLET NAVIGATION ROW -->
         <div class="lg:hidden px-6 pb-3 pt-1 border-t border-slate-100 flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-700">
-            <a href="/" class="hover:text-[#208882] text-[#208882]">Home</a>
+            <a href="/" class="hover:text-[#208882]">Home</a>
             <a href="technology.html" class="hover:text-[#208882]">Technology</a>
             <a href="practices.html" class="hover:text-[#208882]">Practices</a>
             <a href="provider.html" class="hover:text-[#208882]">Providers</a>
-            <a href="protocols.html" class="hover:text-[#208882]">Protocols</a>
+            <a href="protocols.html" class="hover:text-[#208882] text-[#208882]">Protocols</a>
             <a href="osha.html" class="hover:text-[#208882]">OSHA</a>
         </div>
     </header>
@@ -74,58 +74,109 @@
             Standard Operating Procedures
         </span>
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-            Clinical Protocols & <span class="text-[#319795]">Quality Assurance SOPs</span>
+            Clinical Protocols & <span class="text-[#319795]">Quality Assurance</span>
         </h1>
         <p class="text-slate-300 max-w-3xl mx-auto text-base md:text-lg leading-relaxed">
-            Rigorous operational standards governing testing methodology, infection control, and calibration compliance.
+            Rigorous operational standards governing testing methodology, infection control, and diagnostic compliance for our B2B clinical partners.
         </p>
     </section>
 
-    <!-- MAIN CONTENT -->
-    <main class="py-16 px-6 max-w-5xl mx-auto space-y-12">
+    <!-- MAIN CONTENT: SOP INDEX -->
+    <main class="py-16 px-6 max-w-4xl mx-auto space-y-8">
 
         <!-- SOP 1: TESTING -->
-        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <div class="flex items-center space-x-3">
-                <span class="bg-[#208882] text-white font-bold text-sm px-3 py-1 rounded-lg">SOP-01</span>
-                <h2 class="text-2xl font-extrabold text-slate-900">Standard Operating Procedure: Pulmonary Function Testing</h2>
+        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center hover:shadow-md transition">
+            <div class="flex-1 space-y-3">
+                <div class="flex items-center space-x-3">
+                    <span class="bg-[#208882] text-white font-bold text-xs px-3 py-1 rounded-lg uppercase tracking-wider">SOP-01</span>
+                    <h2 class="text-xl md:text-2xl font-extrabold text-slate-900">Pulmonary Function Testing</h2>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Establishes uniform instructions for patient preparation, contraindication screening (such as recent myocardial infarction, eye surgery, or aortic aneurysms), and procedure execution under RRT supervision. Ensures reproducible tidal breathing measurements and maximal forced exhalation maneuvers.
+                </p>
             </div>
-            <p class="text-slate-600 text-sm leading-relaxed">
-                Establishes uniform instructions for patient preparation, contraindication screening (such as recent myocardial infarction, eye surgery, or aortic aneurysms), and procedure execution under RRT supervision. Ensures reproducible tidal breathing measurements and maximal forced exhalation maneuvers.
-            </p>
+            <div class="md:w-48 flex-shrink-0 w-full">
+                <!-- IMPORTANT: Requires a file named 'SOP-01-Testing.pdf' in the root directory -->
+                <a href="SOP-01-Testing.pdf" target="_blank" class="block w-full text-center bg-slate-100 hover:bg-[#0f223d] hover:text-white text-slate-700 font-bold border border-slate-300 hover:border-[#0f223d] py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                    View Full SOP
+                </a>
+            </div>
         </div>
 
         <!-- SOP 2: INFECTION CONTROL -->
-        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <div class="flex items-center space-x-3">
-                <span class="bg-[#208882] text-white font-bold text-sm px-3 py-1 rounded-lg">SOP-02</span>
-                <h2 class="text-2xl font-extrabold text-slate-900">Standard Operating Procedure: Infection Control & Bioburden</h2>
+        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center hover:shadow-md transition">
+            <div class="flex-1 space-y-3">
+                <div class="flex items-center space-x-3">
+                    <span class="bg-[#208882] text-white font-bold text-xs px-3 py-1 rounded-lg uppercase tracking-wider">SOP-02</span>
+                    <h2 class="text-xl md:text-2xl font-extrabold text-slate-900">Infection Control & Bioburden</h2>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Mandates the strict deployment of single-use, disposable 0.025-micron inline viral/bacterial filter mouthpieces achieving >99.999% filtration efficiency. Outlines clinical surface disinfection protocols between patient encounters to ensure full compliance with CDC ambulatory safety guidelines.
+                </p>
             </div>
-            <p class="text-slate-600 text-sm leading-relaxed">
-                Mandates the strict deployment of single-use, disposable 0.025-micron inline viral/bacterial filter mouthpieces achieving >99.999% filtration efficiency. Outlines clinical surface disinfection protocols between patient encounters to ensure full compliance with CDC ambulatory safety guidelines.
-            </p>
+            <div class="md:w-48 flex-shrink-0 w-full">
+                <!-- IMPORTANT: Requires a file named 'SOP-02-Infection.pdf' in the root directory -->
+                <a href="SOP-02-Infection.pdf" target="_blank" class="block w-full text-center bg-slate-100 hover:bg-[#0f223d] hover:text-white text-slate-700 font-bold border border-slate-300 hover:border-[#0f223d] py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                    View Full SOP
+                </a>
+            </div>
         </div>
 
         <!-- SOP 3: ATS/ERS STANDARDS -->
-        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <div class="flex items-center space-x-3">
-                <span class="bg-[#208882] text-white font-bold text-sm px-3 py-1 rounded-lg">SOP-03</span>
-                <h2 class="text-2xl font-extrabold text-slate-900">Standard Operating Procedure: ATS / ERS Compliance & Calibration</h2>
+        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center hover:shadow-md transition">
+            <div class="flex-1 space-y-3">
+                <div class="flex items-center space-x-3">
+                    <span class="bg-[#208882] text-white font-bold text-xs px-3 py-1 rounded-lg uppercase tracking-wider">SOP-03</span>
+                    <h2 class="text-xl md:text-2xl font-extrabold text-slate-900">ATS / ERS Calibration Compliance</h2>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Governs daily equipment calibration checks using certified 3-Liter calibration syringes, ambient temperature/barometric pressure logging, and strict adherence to American Thoracic Society (ATS) and European Respiratory Society (ERS) acceptability and repeatability criteria.
+                </p>
             </div>
-            <p class="text-slate-600 text-sm leading-relaxed">
-                Governs daily equipment calibration checks, ambient temperature/barometric pressure logging, and adherence to American Thoracic Society (ATS) and European Respiratory Society (ERS) acceptability and repeatability criteria.
-            </p>
+            <div class="md:w-48 flex-shrink-0 w-full">
+                <!-- IMPORTANT: Requires a file named 'SOP-03-Calibration.pdf' in the root directory -->
+                <a href="SOP-03-Calibration.pdf" target="_blank" class="block w-full text-center bg-slate-100 hover:bg-[#0f223d] hover:text-white text-slate-700 font-bold border border-slate-300 hover:border-[#0f223d] py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                    View Full SOP
+                </a>
+            </div>
         </div>
 
         <!-- SOP 4: EMR & DATA SECURITY -->
-        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <div class="flex items-center space-x-3">
-                <span class="bg-[#208882] text-white font-bold text-sm px-3 py-1 rounded-lg">SOP-04</span>
-                <h2 class="text-2xl font-extrabold text-slate-900">Standard Operating Procedure: Data Security & EMR Transmission</h2>
+        <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center hover:shadow-md transition">
+            <div class="flex-1 space-y-3">
+                <div class="flex items-center space-x-3">
+                    <span class="bg-[#208882] text-white font-bold text-xs px-3 py-1 rounded-lg uppercase tracking-wider">SOP-04</span>
+                    <h2 class="text-xl md:text-2xl font-extrabold text-slate-900">Data Security & EMR Transmission</h2>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Outlines HIPAA-compliant handling of Protected Health Information (PHI), end-to-end encrypted file transfers via AWS S3 secure infrastructure, and structured 24–48 hour pulmonologist overread integration directly into partner clinic EMR systems.
+                </p>
             </div>
-            <p class="text-slate-600 text-sm leading-relaxed">
-                Outlines HIPAA-compliant handling of Protected Health Information (PHI), encrypted file transfers, and structured 24–48 hour pulmonologist overread integration directly into partner clinic EMR systems.
-            </p>
+            <div class="md:w-48 flex-shrink-0 w-full">
+                <!-- IMPORTANT: Requires a file named 'SOP-04-Security.pdf' in the root directory -->
+                <a href="SOP-04-Security.pdf" target="_blank" class="block w-full text-center bg-slate-100 hover:bg-[#0f223d] hover:text-white text-slate-700 font-bold border border-slate-300 hover:border-[#0f223d] py-3 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                    View Full SOP
+                </a>
+            </div>
+        </div>
+
+        <!-- COMPLIANCE GUARANTEE -->
+        <div class="bg-gradient-to-r from-teal-50 to-emerald-50 border-l-4 border-[#208882] p-8 rounded-r-3xl shadow-sm mt-12 flex items-start gap-4">
+            <div class="bg-white p-2 rounded-full shadow border border-teal-100 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#208882]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">The DirectCare Clinical Guarantee</h3>
+                <p class="text-sm text-slate-700 leading-relaxed">
+                    All standard operating procedures are strictly managed and enforced by a Board-Certified Registered Respiratory Therapist (RRT) holding advanced critical care (ACCS) and pulmonary function testing (CPFT/RPFT) national credentials. Every diagnostic data set submitted to our Pulmonology network is guaranteed to meet ATS/ERS acceptability criteria.
+                </p>
+            </div>
         </div>
 
     </main>
