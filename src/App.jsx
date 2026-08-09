@@ -11,6 +11,7 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   useEffect(() => {
     const handleUnload = () => {
@@ -53,7 +54,7 @@ export default function App() {
   if (!token || !user) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f6f9', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', padding: '20px' }}>
-        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '450px', boxSizing: 'border-box' }}>
+        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '450px', boxSizing: 'border-box', position: 'relative' }}>
           <h2 style={{ marginTop: 0, color: '#1a2a47', textAlign: 'center', fontSize: '24px' }}>DirectCare PFT Portal</h2>
           <p style={{ fontSize: '12px', color: '#718096', textAlign: 'center', marginBottom: '20px' }}>Secure Pulmonary Function Testing & Diagnostic Management</p>
           
@@ -64,10 +65,18 @@ export default function App() {
               <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>Email Address</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} required />
             </div>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '10px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', fontWeight: 'bold', color: '#333' }}>Password</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} required />
             </div>
+
+            {/* Forgot Password Link */}
+            <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+              <button type="button" onClick={() => setShowForgotModal(true)} style={{ background: 'none', border: 'none', color: '#3182ce', fontSize: '12px', cursor: 'pointer', padding: 0, fontWeight: '500' }}>
+                Forgot Password?
+              </button>
+            </div>
+
             <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#1a2a47', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Log In</button>
           </form>
 
@@ -77,6 +86,23 @@ export default function App() {
               <strong>Authorized Access Only:</strong> This system contains Protected Health Information (PHI) governed by HIPAA and executed Business Associate Agreements (BAAs). Unauthorized access, use, or disclosure is strictly prohibited and subject to civil and criminal penalties.
             </p>
           </div>
+
+          {/* FORGOT PASSWORD MODAL */}
+          {showForgotModal && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+              <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '8px', width: '380px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)', textAlign: 'center' }}>
+                <h3 style={{ marginTop: 0, color: '#1a2a47', fontSize: '18px' }}>Password Recovery</h3>
+                <p style={{ fontSize: '13px', color: '#4a5568', lineHeight: '1.5', marginBottom: '20px' }}>
+                  To maintain HIPAA security compliance for Protected Health Information, password resets must be processed by your system administrator. 
+                  <br/><br/>
+                  Please contact your clinic administrator or system support directly to request a secure temporary password reset.
+                </p>
+                <button type="button" onClick={() => setShowForgotModal(false)} style={{ width: '100%', padding: '10px', backgroundColor: '#1a2a47', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
