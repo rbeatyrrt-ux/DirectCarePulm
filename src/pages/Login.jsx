@@ -21,9 +21,9 @@ export default function Login({ onLoginSuccess }) {
       
       if (!res.ok) throw new Error(data.error || 'Login failed');
 
-      // Save to local storage so they stay logged in if they refresh
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Save to session storage so they are automatically logged out when the browser or tab closes
+    sessionStorage.setItem('token', data.token);
+    sessionStorage.setItem('user', JSON.stringify(data.user));
       
       // Tell the main App that login worked!
       onLoginSuccess(data.token, data.user);
