@@ -27,13 +27,13 @@
         </div>
     </div>
 
-    <!-- HEADER WITH NAVIGATION, LOGO, AND SECURE PORTAL BUTTON -->
+    <!-- MAIN HEADER -->
     <header class="sticky top-0 z-50 bg-white shadow-lg border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-6">
             
-            <!-- NAVIGATION -->
-            <nav class="flex flex-wrap justify-center md:justify-start gap-6 md:gap-8 text-sm font-bold text-slate-700 items-center">
-                <a href="index.html" class="hover:text-[#208882] transition pb-1">Home</a>
+            <!-- SINGLE-ROW NAVIGATION -->
+            <nav class="flex flex-wrap justify-center md:justify-start gap-5 md:gap-7 text-sm font-bold text-slate-700 items-center">
+                <a href="index.html" class="hover:text-[#208882] transition pb-1 text-[#208882]">Home</a>
                 <a href="technology.html" class="hover:text-[#208882] transition pb-1">Technology (MiniBox+)</a>
                 <a href="practices.html" class="hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
                 <a href="provider.html" class="hover:text-[#208882] transition pb-1">For Providers</a>
@@ -41,12 +41,11 @@
                 <a href="osha.html" class="hover:text-[#208882] transition pb-1">OSHA Compliance</a>
             </nav>
             
-            <!-- RIGHT SIDE: LOGO & PORTAL LOGIN BUTTON -->
-            <div class="flex items-center gap-6">
+            <!-- RIGHT SIDE: SECURE PORTAL BUTTON & LOGO -->
+            <div class="flex items-center gap-5 flex-shrink-0">
                 <!-- SECURE HIPAA PORTAL BUTTON -->
                 <a href="https://portal.directcarepulm.com" class="flex items-center gap-3 bg-slate-900 hover:bg-[#0f223d] text-white px-4 py-2.5 rounded-xl shadow-md border border-slate-800 transition group">
                     <div class="bg-[#208882] p-2 rounded-lg text-white group-hover:bg-teal-600 transition">
-                        <!-- Lock Icon SVG -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
@@ -58,8 +57,8 @@
                 </a>
 
                 <!-- LOGO -->
-                <a href="index.html" class="flex-shrink-0 bg-white p-2 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
-                    <img src="images/logo.png" alt="DirectCare Pulmonary Diagnostics Logo" class="h-20 md:h-24 w-auto object-contain blend-logo">
+                <a href="index.html" class="bg-white p-2 rounded-2xl shadow-md border border-slate-100 hover:shadow-lg transition">
+                    <img src="images/logo.png" alt="DirectCare Pulmonary Diagnostics Logo" class="h-16 md:h-20 w-auto object-contain blend-logo">
                 </a>
             </div>
 
@@ -91,7 +90,7 @@
             </div>
         </section>
 
-        <!-- SOURCED & CITED STATS & EPIDEMIOLOGICAL DATA SECTION -->
+        <!-- SOURCED & CITED STATS SECTION -->
         <section class="py-20 bg-white border-b border-slate-200 px-6">
             <div class="max-w-6xl mx-auto">
                 <div class="text-center max-w-2xl mx-auto mb-16">
@@ -101,7 +100,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                    <!-- Card 1 -->
                     <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="text-4xl font-extrabold text-[#208882] mb-3">8.6%</div>
@@ -113,7 +111,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 2 -->
                     <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="text-4xl font-extrabold text-[#208882] mb-3">Nearly 2x</div>
@@ -125,7 +122,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 3 -->
                     <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
                         <div>
                             <div class="text-4xl font-extrabold text-[#208882] mb-3">24–48 Hr</div>
@@ -136,43 +132,6 @@
                             Source: <em>Journal of Rural Health / National Action Plan</em>
                         </div>
                     </div>
-                </div>
-
-                <!-- GRAPHIC CHART BLOCK -->
-                <div class="bg-slate-900 text-white p-8 md:p-12 rounded-3xl shadow-xl">
-                    <h3 class="text-xl font-bold mb-2 text-center text-teal-300">COPD Prevalence Gradient by County Urbanicity</h3>
-                    <p class="text-xs text-slate-400 text-center mb-8">Data demonstrating the rise of chronic respiratory disease burden in rural and micropolitan corridors.</p>
-                    
-                    <div class="space-y-6 max-w-4xl mx-auto">
-                        <div>
-                            <div class="flex justify-between text-sm mb-1 font-semibold">
-                                <span>Rural / Noncore Counties (Highest Prevalence Corridor)</span>
-                                <span class="text-teal-400">8.2% Prevalence</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
-                                <div class="bg-[#208882] h-full rounded-full" style="width: 82%;"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm mb-1 font-semibold">
-                                <span>Micropolitan Counties</span>
-                                <span class="text-teal-300">7.1% Prevalence</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
-                                <div class="bg-[#208882]/80 h-full rounded-full" style="width: 71%;"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm mb-1 font-semibold">
-                                <span>Large Metropolitan Centers</span>
-                                <span class="text-slate-400">4.7% Prevalence</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
-                                <div class="bg-slate-600 h-full rounded-full" style="width: 47%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-slate-400 text-center mt-8">Reference Data: Centers for Disease Control and Prevention (CDC) MMWR Surveillance Summaries.</p>
                 </div>
             </div>
         </section>
