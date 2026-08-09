@@ -9,6 +9,19 @@
         .blend-logo {
             mix-blend-mode: multiply;
         }
+        /* Thematic "Breathing" Animation */
+        @keyframes breathe {
+            0%   { transform: scale(1); opacity: 0.9; }
+            50%  { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        .animate-breathe {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        /* Custom Slider Styling */
+        input[type=range] {
+            accent-color: #208882;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
@@ -61,7 +74,7 @@
 
         </div>
 
-        <!-- MOBILE / TABLET NAVIGATION ROW (Shows on smaller screens if needed) -->
+        <!-- MOBILE / TABLET NAVIGATION ROW -->
         <div class="lg:hidden px-6 pb-3 pt-1 border-t border-slate-100 flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-700">
             <a href="/" class="hover:text-[#208882] text-[#208882]">Home</a>
             <a href="technology.html" class="hover:text-[#208882]">Technology</a>
@@ -75,9 +88,9 @@
     <!-- MAIN HOMEPAGE CONTENT -->
     <main>
         <!-- HERO SECTION -->
-        <section class="bg-gradient-to-br from-[#0f223d] via-[#1A365D] to-[#0f223d] text-white py-24 px-6">
-            <div class="max-w-5xl mx-auto text-center">
-                <span class="bg-[#208882]/30 text-teal-300 border border-[#208882]/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6">
+        <section class="bg-gradient-to-br from-[#0f223d] via-[#1A365D] to-[#0f223d] text-white py-24 px-6 relative overflow-hidden">
+            <div class="max-w-5xl mx-auto text-center relative z-10">
+                <span class="animate-breathe bg-[#208882]/30 text-teal-300 border border-[#208882]/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6 shadow-[0_0_15px_rgba(32,136,130,0.4)]">
                     Veteran-Owned Mobile Healthcare Innovation
                 </span>
                 <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
@@ -97,8 +110,82 @@
             </div>
         </section>
 
+        <!-- THE REFERRAL LEAKAGE CRISIS -->
+        <section class="py-16 bg-slate-100 border-b border-slate-200 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center gap-10">
+                    <div class="md:w-1/2">
+                        <span class="text-rose-600 font-bold text-sm uppercase tracking-widest">The Rural Referral Reality</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 mt-2 mb-4">Why Outpatient Referrals Fail.</h2>
+                        <p class="text-slate-600 mb-6 leading-relaxed">
+                            When rural primary care providers refer patients to regional hospital systems for pulmonary diagnostics, the drop-off rates severely impact clinical outcomes. Transportation friction creates a critical barrier to care.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <div class="bg-rose-100 p-1.5 rounded-full text-rose-600 mr-3 mt-0.5">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                                </div>
+                                <div>
+                                    <strong class="text-slate-900 block">Up to 45% Non-Attendance Rate</strong>
+                                    <span class="text-sm text-slate-600">Nearly half of all rural patients abandon specialty testing referrals when forced to travel to an out-of-town facility.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-rose-100 p-1.5 rounded-full text-rose-600 mr-3 mt-0.5">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                                </div>
+                                <div>
+                                    <strong class="text-slate-900 block">The 45-Minute Travel Barrier</strong>
+                                    <span class="text-sm text-slate-600">Top barrier cited in regional Health Assessments: drive time, mobility limitations, and gas expenses for elderly/low-income populations.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-rose-100 p-1.5 rounded-full text-rose-600 mr-3 mt-0.5">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                                </div>
+                                <div>
+                                    <strong class="text-slate-900 block">14 to 21 Day Scheduling Delays</strong>
+                                    <span class="text-sm text-slate-600">Overburdened urban labs result in weeks of waiting, delaying critical COPD staging and medication management.</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:w-1/2 w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                        <div class="text-center mb-6">
+                            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Interactive Demo</span>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-3">Practice Impact Calculator</h3>
+                            <p class="text-sm text-slate-500 mt-2">See how much diagnostic data (and revenue) leaves your clinic.</p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Monthly Outpatient PFT Referrals: <span id="referralVal" class="text-[#208882] text-lg">20</span></label>
+                            <input type="range" id="referralSlider" min="5" max="100" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                <span>5</span>
+                                <span>100</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-rose-50 p-4 rounded-xl border border-rose-100 text-center transition-all duration-300" id="card-lost">
+                                <div class="text-sm text-rose-800 font-semibold mb-1">Patients Lost (45%)</div>
+                                <div class="text-3xl font-extrabold text-rose-600" id="calcLost">9</div>
+                                <div class="text-[10px] text-rose-500 mt-1">Due to travel friction</div>
+                            </div>
+                            <div class="bg-teal-50 p-4 rounded-xl border border-teal-100 text-center transition-all duration-300" id="card-rev">
+                                <div class="text-sm text-teal-800 font-semibold mb-1">Retained Margin</div>
+                                <div class="text-3xl font-extrabold text-[#208882]" id="calcRev">$1,700</div>
+                                <div class="text-[10px] text-teal-600 mt-1">Est. monthly practice ROI</div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-center text-slate-400 mt-4 italic">*Estimates based on average blended margins ($85/test) via DirectCare partnership.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- SOURCED & CITED STATS SECTION -->
-        <section class="py-20 bg-white border-b border-slate-200 px-6">
+        <section class="py-20 bg-white px-6">
             <div class="max-w-6xl mx-auto">
                 <div class="text-center max-w-2xl mx-auto mb-16">
                     <span class="text-[#208882] font-bold text-sm uppercase tracking-widest">Evidence-Based Need</span>
@@ -107,7 +194,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
                         <div>
                             <div class="text-4xl font-extrabold text-[#208882] mb-3">8.6%</div>
                             <h3 class="font-bold text-slate-900 mb-2">High State-Level COPD Burden</h3>
@@ -118,7 +205,7 @@
                         </div>
                     </div>
 
-                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
                         <div>
                             <div class="text-4xl font-extrabold text-[#208882] mb-3">Nearly 2x</div>
                             <h3 class="font-bold text-slate-900 mb-2">Rural vs. Urban Disparity</h3>
@@ -129,14 +216,14 @@
                         </div>
                     </div>
 
-                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
                         <div>
-                            <div class="text-4xl font-extrabold text-[#208882] mb-3">24–48 Hr</div>
-                            <h3 class="font-bold text-slate-900 mb-2">Closing the Diagnostic Loop</h3>
-                            <p class="text-sm text-slate-600 mb-4">By eliminating the 45–90 minute travel barrier to urban hospital labs, in-office mobile testing dramatically prevents diagnostic drop-off and secures timely pulmonologist overreads.</p>
+                            <div class="text-4xl font-extrabold text-[#208882] mb-3">100%</div>
+                            <h3 class="font-bold text-slate-900 mb-2">Diagnostic Capture Rate</h3>
+                            <p class="text-sm text-slate-600 mb-4">Testing patients directly in their primary care home on dedicated "PFT Clinic Days" essentially guarantees compliance and secures timely tele-pulmonology overreads.</p>
                         </div>
                         <div class="text-[11px] text-slate-400 border-t border-slate-200 pt-3">
-                            Source: <em>Journal of Rural Health / National Action Plan</em>
+                            Source: <em>DirectCare Mobile Workflow Projections</em>
                         </div>
                     </div>
                 </div>
@@ -145,7 +232,7 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-[#0f223d] text-slate-400 py-12 px-6 border-t border-slate-900 mt-20">
+    <footer class="bg-[#0f223d] text-slate-400 py-12 px-6 border-t border-slate-900 mt-10">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="text-sm">
                 <p class="font-bold text-white">DirectCare Pulmonary Diagnostics LLC</p>
@@ -163,5 +250,37 @@
             <div class="text-xs text-slate-500 text-center md:text-right">&copy; 2026 DirectCare. SDVOSB Certified.</div>
         </div>
     </footer>
+
+    <!-- INTERACTIVE CALCULATOR SCRIPT -->
+    <script>
+        const slider = document.getElementById('referralSlider');
+        const referralVal = document.getElementById('referralVal');
+        const calcLost = document.getElementById('calcLost');
+        const calcRev = document.getElementById('calcRev');
+        const cardLost = document.getElementById('card-lost');
+        const cardRev = document.getElementById('card-rev');
+
+        function updateCalculator() {
+            const val = parseInt(slider.value);
+            referralVal.innerText = val;
+            
+            // Math calculations
+            const lostPatients = Math.round(val * 0.45);
+            const retainedRev = val * 85;
+
+            calcLost.innerText = lostPatients;
+            calcRev.innerText = '$' + retainedRev.toLocaleString();
+
+            // Tiny animation effect for visual feedback
+            cardLost.style.transform = 'scale(1.02)';
+            cardRev.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                cardLost.style.transform = 'scale(1)';
+                cardRev.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        slider.addEventListener('input', updateCalculator);
+    </script>
 </body>
 </html>
