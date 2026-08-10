@@ -61,7 +61,9 @@ async function initializeDatabase() {
         clinic_name VARCHAR(255),
         credentials VARCHAR(100),
         npi VARCHAR(20),
-        must_change_password BOOLEAN DEFAULT FALSE
+        must_change_password BOOLEAN DEFAULT FALSE,
+        baa_signed BOOLEAN DEFAULT FALSE,
+        baa_signed_date TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS password_history (
@@ -101,6 +103,8 @@ async function initializeDatabase() {
       );
 
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_dob DATE;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed BOOLEAN DEFAULT FALSE;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
     `);
   } catch (err) {
     console.error("Database initialization check failed:", err);
@@ -148,11 +152,31 @@ app.post('/api/login', async (req, res) => {
         clinic_name: user.clinic_name,
         credentials: user.credentials,
         npi: user.npi,
-        must_change_password: user.must_change_password 
+        must_change_password: user.must_change_password,
+        baa_signed: user.baa_signed 
       }
     });
   } catch (err) {
     res.status(500).json({ error: 'Server error during login' });
+  }
+});
+
+// RECORD DIGITAL BAA SIGNATURE ENDPOINT
+app.post('/api/auth/sign-baa', verifyToken, async (req, res) => {
+  try {
+    const updateResult = await pool.query(
+      `UPDATE users 
+       SET baa_signed = TRUE, baa_signed_date = CURRENT_TIMESTAMP 
+       WHERE user_id = $1 
+       RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, must_change_password, baa_signed`,
+      [req.user.user_id]
+    );
+    if (updateResult.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
+    res.json({ message: 'BAA successfully executed and recorded', user: updateResult.rows[0] });
+  } catch (err) {
+    console.error('BAA signature error:', err);
+    res.status(500).json({ error: 'Failed to record BAA signature' });
   }
 });
 
@@ -202,7 +226,7 @@ app.post('/api/forgot-password', async (req, res) => {
 
 app.get('/api/auth/me', verifyToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, must_change_password FROM users WHERE user_id = $1', [req.user.user_id]);
+    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, must_change_password, baa_signed FROM users WHERE user_id = $1', [req.user.user_id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json(result.rows[0]);
   } catch (err) {
@@ -251,7 +275,7 @@ app.put('/api/auth/update-credentials', verifyToken, async (req, res) => {
       params.push(hashedPin);
     }
 
-    query += ` WHERE user_id = $${paramIndex} RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, must_change_password;`;
+    query += ` WHERE user_id = $${paramIndex} RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, must_change_password, baa_signed;`;
     params.push(req.user.user_id);
 
     const updateResult = await pool.query(query, params);
@@ -352,7 +376,7 @@ app.post('/api/users', verifyToken, async (req, res) => {
       const query = `
         INSERT INTO users (full_name, email, password_hash, role, clinic_name, credentials, npi, must_change_password)
         VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
-        RETURNING user_id, full_name, email, role, clinic_name, credentials, npi;
+        RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed;
       `;
       const result = await pool.query(query, [full_name, email, hashedPassword, role || 'provider', assignedClinic, credentials, npi]);
       
@@ -385,10 +409,10 @@ app.put('/api/users/:id', verifyToken, async (req, res) => {
     if (password && password.trim() !== '') {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-      query += `, password_hash = $7 WHERE user_id = $8 RETURNING user_id, full_name, email, role, clinic_name, credentials, npi;`;
+      query += `, password_hash = $7 WHERE user_id = $8 RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed;`;
       params.push(hashedPassword, id);
     } else {
-      query += ` WHERE user_id = $7 RETURNING user_id, full_name, email, role, clinic_name, credentials, npi;`;
+      query += ` WHERE user_id = $7 RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed;`;
       params.push(id);
     }
 
@@ -701,7 +725,7 @@ app.post('/api/requests', verifyToken, async (req, res) => {
 
 app.get('/api/users', verifyToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi FROM users ORDER BY user_id ASC');
+    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed FROM users ORDER BY user_id ASC');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users' });
