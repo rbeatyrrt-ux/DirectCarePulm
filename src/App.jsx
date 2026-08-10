@@ -12,8 +12,9 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
-  // Forgot Password Modal State
+  // Forgot Password & BAA Onboarding States
   const [showForgotModal, setShowForgotModal] = useState(false);
+  const [baaError, setBaaError] = useState('');
 
   useEffect(() => {
     const handleUnload = () => {
@@ -105,6 +106,60 @@ export default function App() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // MANDATORY BAA ONBOARDING INTERCEPTOR
+  if (token && user && !user.baa_signed) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f6f9', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', padding: '20px' }}>
+        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '600px', boxSizing: 'border-box' }}>
+          <h2 style={{ marginTop: 0, color: '#1a2a47', textAlign: 'center', fontSize: '22px' }}>Mandatory Security & Compliance Onboarding</h2>
+          <p style={{ fontSize: '13px', color: '#4a5568', lineHeight: '1.5', marginBottom: '20px', textAlign: 'center' }}>
+            Before accessing the DirectCare PFT Portal dashboard, you must execute your digital Business Associate Agreement (BAA) to comply with HIPAA and HITECH standards.
+          </p>
+
+          {baaError && <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '4px', marginBottom: '15px', fontSize: '13px' }}>{baaError}</div>}
+
+          <div style={{ maxHeight: '160px', overflowY: 'auto', padding: '15px', backgroundColor: '#f8f9fa', border: '1px solid #cbd5e0', borderRadius: '4px', marginBottom: '20px', fontSize: '11px', color: '#4a5568', lineHeight: '1.4' }}>
+            <strong>BUSINESS ASSOCIATE AGREEMENT (BAA) TERMS:</strong><br />
+            This Business Associate Agreement ("BAA") is entered into by and between DirectCare Pulmonary Diagnostics LLC and the participating clinical organization. Pursuant to HIPAA/HITECH regulations, the Business Associate agrees to safeguard Protected Health Information (PHI), implement administrative, physical, and technical safeguards, report any security incidents or data breaches promptly, and ensure all downstream users maintain strict confidentiality. By clicking "I Agree & Sign BAA", your organization legally binds itself to these data protection standards.
+          </div>
+
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            setBaaError('');
+            try {
+              const res = await fetch('https://directcare-backend.onrender.com/api/auth/sign-baa', {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Failed to sign BAA');
+
+              // Update local user state with signed BAA status
+              setUser(data.user);
+              sessionStorage.setItem('user', JSON.stringify(data.user));
+            } catch (err) {
+              setBaaError(err.message);
+            }
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+              <input type="checkbox" id="baaCheckbox" required style={{ marginRight: '10px', width: '18px', height: '18px' }} />
+              <label htmlFor="baaCheckbox" style={{ fontSize: '12px', color: '#1a2a47', fontWeight: 'bold', cursor: 'pointer' }}>
+                I have read, understood, and legally agree to the terms of the Business Associate Agreement (BAA) on behalf of my practice.
+              </label>
+            </div>
+
+            <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#1a2a47', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>
+              I Agree & Sign BAA — Proceed to Portal
+            </button>
+          </form>
         </div>
       </div>
     );
