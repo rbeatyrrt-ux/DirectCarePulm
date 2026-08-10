@@ -12,9 +12,11 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
-  // Forgot Password & BAA Onboarding States
+  // Forgot Password & Onboarding States
   const [showForgotModal, setShowForgotModal] = useState(false);
-  const [baaError, setBaaError] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [onboardingError, setOnboardingError] = useState('');
 
   useEffect(() => {
     const handleUnload = () => {
@@ -111,53 +113,101 @@ export default function App() {
     );
   }
 
-  // MANDATORY BAA ONBOARDING INTERCEPTOR
-  if (token && user && !user.baa_signed) {
+  // MANDATORY ONBOARDING: Intercept if user must change password OR hasn't signed the BAA
+  if (token && user && (user.must_change_password || !user.baa_signed)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f6f9', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', padding: '20px' }}>
-        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '600px', boxSizing: 'border-box' }}>
-          <h2 style={{ marginTop: 0, color: '#1a2a47', textAlign: 'center', fontSize: '22px' }}>Mandatory Security & Compliance Onboarding</h2>
+        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '520px', boxSizing: 'border-box' }}>
+          <h2 style={{ marginTop: 0, color: '#1a2a47', textAlign: 'center', fontSize: '22px' }}>Security & Compliance Onboarding</h2>
           <p style={{ fontSize: '13px', color: '#4a5568', lineHeight: '1.5', marginBottom: '20px', textAlign: 'center' }}>
-            Before accessing the DirectCare PFT Portal dashboard, you must execute your digital Business Associate Agreement (BAA) to comply with HIPAA and HITECH standards.
+            Please complete your mandatory password update and execute your digital Business Associate Agreement (BAA) to access the portal.
           </p>
 
-          {baaError && <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '4px', marginBottom: '15px', fontSize: '13px' }}>{baaError}</div>}
-
-          <div style={{ maxHeight: '160px', overflowY: 'auto', padding: '15px', backgroundColor: '#f8f9fa', border: '1px solid #cbd5e0', borderRadius: '4px', marginBottom: '20px', fontSize: '11px', color: '#4a5568', lineHeight: '1.4' }}>
-            <strong>BUSINESS ASSOCIATE AGREEMENT (BAA) TERMS:</strong><br />
-            This Business Associate Agreement ("BAA") is entered into by and between DirectCare Pulmonary Diagnostics LLC and the participating clinical organization. Pursuant to HIPAA/HITECH regulations, the Business Associate agrees to safeguard Protected Health Information (PHI), implement administrative, physical, and technical safeguards, report any security incidents or data breaches promptly, and ensure all downstream users maintain strict confidentiality. By clicking "I Agree & Sign BAA", your organization legally binds itself to these data protection standards.
-          </div>
+          {onboardingError && <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '4px', marginBottom: '15px', fontSize: '13px' }}>{onboardingError}</div>}
 
           <form onSubmit={async (e) => {
             e.preventDefault();
-            setBaaError('');
-            try {
-              const res = await fetch('https://directcare-backend.onrender.com/api/auth/sign-baa', {
-                method: 'POST',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-                }
-              });
-              const data = await res.json();
-              if (!res.ok) throw new Error(data.error || 'Failed to sign BAA');
+            setOnboardingError('');
 
-              // Update local user state with signed BAA status
-              setUser(data.user);
-              sessionStorage.setItem('user', JSON.stringify(data.user));
+            if (user.must_change_password) {
+              if (!newPassword || newPassword.trim() === '') {
+                setOnboardingError('Please enter a new password.');
+                return;
+              }
+              if (newPassword !== confirmPassword) {
+                setOnboardingError('New passwords do not match.');
+                return;
+              }
+            }
+
+            try {
+              // 1. Update Password if required
+              if (user.must_change_password) {
+                const passRes = await fetch('https://directcare-backend.onrender.com/api/auth/update-credentials', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                  body: JSON.stringify({ current_password: password, new_password: newPassword })
+                });
+                const passData = await passRes.json();
+                if (!passRes.ok) throw new Error(passData.error || 'Failed to update password');
+                
+                // Update local user object state for password change completion
+                user.must_change_password = false;
+              }
+
+              // 2. Sign BAA if not signed
+              if (!user.baa_signed) {
+                const baaRes = await fetch('https://directcare-backend.onrender.com/api/auth/sign-baa', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const baaData = await baaRes.json();
+                if (!baaRes.ok) throw new Error(baaData.error || 'Failed to record BAA signature');
+                
+                setUser(baaData.user);
+                sessionStorage.setItem('user', JSON.stringify(baaData.user));
+              } else {
+                // If BAA was already signed, just update stored user state
+                setUser({ ...user, must_change_password: false });
+                sessionStorage.setItem('user', JSON.stringify({ ...user, must_change_password: false }));
+              }
+
+              window.location.reload();
             } catch (err) {
-              setBaaError(err.message);
+              setOnboardingError(err.message);
             }
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-              <input type="checkbox" id="baaCheckbox" required style={{ marginRight: '10px', width: '18px', height: '18px' }} />
-              <label htmlFor="baaCheckbox" style={{ fontSize: '12px', color: '#1a2a47', fontWeight: 'bold', cursor: 'pointer' }}>
-                I have read, understood, and legally agree to the terms of the Business Associate Agreement (BAA) on behalf of my practice.
-              </label>
-            </div>
+            {user.must_change_password && (
+              <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#1a2a47' }}>Step 1: Set New Permanent Password</h4>
+                <div style={{ marginBottom: '10px' }}>
+                  <label style={{ display: 'block', marginBottom: '3px', fontSize: '12px', fontWeight: 'bold' }}>New Password</label>
+                  <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} required />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '3px', fontSize: '12px', fontWeight: 'bold' }}>Confirm New Password</label>
+                  <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} required />
+                </div>
+              </div>
+            )}
+
+            {!user.baa_signed && (
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#1a2a47' }}>Step 2: Business Associate Agreement (BAA)</h4>
+                <div style={{ maxHeight: '110px', overflowY: 'auto', padding: '10px', backgroundColor: '#f8f9fa', border: '1px solid #cbd5e0', borderRadius: '4px', marginBottom: '10px', fontSize: '11px', color: '#4a5568', lineHeight: '1.3' }}>
+                  Pursuant to HIPAA/HITECH regulations, the Business Associate agrees to safeguard Protected Health Information (PHI), maintain technical safeguards, and adhere to strict privacy rules.
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <input type="checkbox" id="baaCheck" required style={{ marginRight: '10px', width: '16px', height: '16px' }} />
+                  <label htmlFor="baaCheck" style={{ fontSize: '11px', color: '#1a2a47', fontWeight: 'bold', cursor: 'pointer' }}>
+                    I legally agree to the terms of the BAA on behalf of my practice.
+                  </label>
+                </div>
+              </div>
+            )}
 
             <button type="submit" style={{ width: '100%', padding: '12px', backgroundColor: '#1a2a47', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>
-              I Agree & Sign BAA — Proceed to Portal
+              Complete Onboarding & Access Portal
             </button>
           </form>
         </div>
