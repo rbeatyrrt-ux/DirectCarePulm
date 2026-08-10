@@ -38,7 +38,7 @@
 
             <!-- MIDDLE: NAVIGATION LINKS -->
             <nav class="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-700">
-                <a href="/" class="hover:text-[#208882] transition pb-1 text-[#208882]">Home</a>
+                <a href="/" class="hover:text-[#208882] transition pb-1">Home</a>
                 <a href="technology.html" class="hover:text-[#208882] transition pb-1">Technology (MiniBox+)</a>
                 <a href="practices.html" class="hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
                 <a href="provider.html" class="hover:text-[#208882] transition pb-1">For Providers</a>
@@ -61,9 +61,9 @@
 
         </div>
 
-        <!-- MOBILE / TABLET NAVIGATION ROW (Shows on smaller screens if needed) -->
+        <!-- MOBILE / TABLET NAVIGATION ROW -->
         <div class="lg:hidden px-6 pb-3 pt-1 border-t border-slate-100 flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-700">
-            <a href="/" class="hover:text-[#208882] text-[#208882]">Home</a>
+            <a href="/" class="hover:text-[#208882]">Home</a>
             <a href="technology.html" class="hover:text-[#208882]">Technology</a>
             <a href="practices.html" class="hover:text-[#208882]">Practices</a>
             <a href="provider.html" class="hover:text-[#208882]">Providers</a>
@@ -119,27 +119,36 @@
 
             <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                 <h4 class="font-bold text-slate-900 mb-4">Send a Direct Inquiry</h4>
-                <form onsubmit="event.preventDefault(); alert('Thank you! Your inquiry has been sent to Robert Beaty at robert.beaty@directcarepulm.com.');" class="space-y-4">
+                
+                <!-- LIVE FORMSPREE SUBMISSION FORM -->
+                <!-- REpalce https://formspree.io/f/xbgrgyog with the link Formspree provides -->
+                <form action="https://formspree.io/f/xbgrgyogE" method="POST" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Clinic / Practice Name</label>
-                        <input type="text" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white">
+                        <input type="text" name="Clinic_Name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white">
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Contact Name</label>
-                        <input type="text" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white">
+                        <input type="text" name="Contact_Name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white">
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Email / Phone</label>
-                        <input type="text" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white">
+                        <input type="text" name="Contact_Info" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white">
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Message / Desired Pilot Date</label>
-                        <textarea rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white"></textarea>
+                        <textarea name="Message" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#208882] bg-white"></textarea>
                     </div>
+                    
+                    <!-- Formspree hidden redirect (Where to go after hitting submit) -->
+                    <!-- This bounces them right back to the contact page so they don't get stuck on a Formspree "Thank You" page -->
+                    <input type="hidden" name="_next" value="https://directcarepulm.com/contact.html">
+                    
                     <button type="submit" class="w-full bg-[#208882] hover:bg-[#1a706b] text-white font-bold py-2.5 rounded-lg text-sm transition shadow">
                         Submit Inquiry
                     </button>
                 </form>
+
             </div>
         </div>
     </main>
