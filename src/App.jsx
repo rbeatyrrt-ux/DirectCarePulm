@@ -117,7 +117,7 @@ export default function App() {
   if (token && user && (user.must_change_password || !user.baa_signed)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f6f9', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', padding: '20px' }}>
-        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '520px', boxSizing: 'border-box' }}>
+        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '600px', boxSizing: 'border-box' }}>
           <h2 style={{ marginTop: 0, color: '#1a2a47', textAlign: 'center', fontSize: '22px' }}>Security & Compliance Onboarding</h2>
           <p style={{ fontSize: '13px', color: '#4a5568', lineHeight: '1.5', marginBottom: '20px', textAlign: 'center' }}>
             Please complete your mandatory password update and execute your digital Business Associate Agreement (BAA) to access the portal.
@@ -151,7 +151,6 @@ export default function App() {
                 const passData = await passRes.json();
                 if (!passRes.ok) throw new Error(passData.error || 'Failed to update password');
                 
-                // Update local user object state for password change completion
                 user.must_change_password = false;
               }
 
@@ -167,7 +166,6 @@ export default function App() {
                 setUser(baaData.user);
                 sessionStorage.setItem('user', JSON.stringify(baaData.user));
               } else {
-                // If BAA was already signed, just update stored user state
                 setUser({ ...user, must_change_password: false });
                 sessionStorage.setItem('user', JSON.stringify({ ...user, must_change_password: false }));
               }
@@ -194,13 +192,21 @@ export default function App() {
             {!user.baa_signed && (
               <div style={{ marginBottom: '20px' }}>
                 <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#1a2a47' }}>Step 2: Business Associate Agreement (BAA)</h4>
-                <div style={{ maxHeight: '110px', overflowY: 'auto', padding: '10px', backgroundColor: '#f8f9fa', border: '1px solid #cbd5e0', borderRadius: '4px', marginBottom: '10px', fontSize: '11px', color: '#4a5568', lineHeight: '1.3' }}>
-                  Pursuant to HIPAA/HITECH regulations, the Business Associate agrees to safeguard Protected Health Information (PHI), maintain technical safeguards, and adhere to strict privacy rules.
+                
+                {/* Robust Legal BAA Text Box */}
+                <div style={{ maxHeight: '150px', overflowY: 'auto', padding: '12px', backgroundColor: '#f8f9fa', border: '1px solid #cbd5e0', borderRadius: '4px', marginBottom: '12px', fontSize: '10px', color: '#2d3748', lineHeight: '1.4' }}>
+                  <strong>DIGITAL BUSINESS ASSOCIATE AGREEMENT (BAA)</strong><br />
+                  Between DirectCare Pulmonary Diagnostics LLC and the Participating Clinical Entity.<br /><br />
+                  <strong>1. Purpose & Scope:</strong> This Agreement is entered into to comply with the Health Insurance Portability and Accountability Act of 1996 (HIPAA), the Health Information Technology for Economic and Clinical Health (HITECH) Act, and implementing regulations. This governs the safeguarding, electronic transmission, and storage of Protected Health Information (PHI).<br /><br />
+                  <strong>2. Obligations of Business Associate:</strong> DirectCare Pulmonary Diagnostics LLC agrees to use and disclose PHI only as permitted or required by law, implement administrative, physical, and technical safeguards to prevent unauthorized access, and report any security incidents or data breaches in accordance with federal standards.<br /><br />
+                  <strong>3. Obligations of Covered Entity (User Practice):</strong> The participating user and clinic agree to ensure that all transmitted patient data, orders, and credentials comply with minimum necessary standards, and that local workstation endpoints maintain full-disk encryption and strict access controls.<br /><br />
+                  <strong>4. Termination & Audit:</strong> Violation of these security terms constitutes material breach and permits immediate termination of portal access.
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <input type="checkbox" id="baaCheck" required style={{ marginRight: '10px', width: '16px', height: '16px' }} />
-                  <label htmlFor="baaCheck" style={{ fontSize: '11px', color: '#1a2a47', fontWeight: 'bold', cursor: 'pointer' }}>
-                    I legally agree to the terms of the BAA on behalf of my practice.
+
+                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <input type="checkbox" id="baaCheck" required style={{ marginRight: '10px', marginTop: '2px', width: '16px', height: '16px' }} />
+                  <label htmlFor="baaCheck" style={{ fontSize: '11px', color: '#1a2a47', fontWeight: 'bold', cursor: 'pointer', lineHeight: '1.4' }}>
+                    I am an authorized representative of my clinical practice, and I legally accept and bind my organization to the terms of this Business Associate Agreement (BAA).
                   </label>
                 </div>
               </div>
