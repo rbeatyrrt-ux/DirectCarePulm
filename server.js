@@ -180,6 +180,100 @@ app.post('/api/auth/sign-baa', verifyToken, async (req, res) => {
   }
 });
 
+// MASTER IRON-CLAD BAA PDF GENERATOR ENDPOINT
+app.get('/api/master-baa-pdf', verifyToken, async (req, res) => {
+  try {
+    const doc = new PDFDocument({ margin: 50, autoFirstPage: true });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=DirectCare_Master_Business_Associate_Agreement.pdf');
+    doc.pipe(res);
+
+    // --- PAGE 1: TITLE & RECITALS ---
+    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('BUSINESS ASSOCIATE AGREEMENT', { align: 'center' });
+    doc.fontSize(11).fillColor('#4a5568').font('Helvetica').text('PURSUANT TO HIPAA / HITECH REGULATIONS', { align: 'center' });
+    doc.moveDown(1.5);
+
+    doc.fontSize(9).fillColor('#2d3748').text(
+      'This Business Associate Agreement ("Agreement") is entered into by and between DirectCare Pulmonary Diagnostics LLC ("Business Associate") and the participating healthcare practice, clinic, or ordering provider ("Covered Entity"). This Agreement is executed to ensure compliance with the administrative simplification provisions of the Health Insurance Portability and Accountability Act of 1996 (HIPAA), the Health Information Technology for Economic and Clinical Health (HITECH) Act (P.L. 111-5), and implementing regulations promulgated thereunder.',
+      { lineGap: 3 }
+    );
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').text('RECITALS');
+    doc.font('Helvetica').text(
+      'WHEREAS, Covered Entity possesses Protected Health Information (PHI) that is protected under HIPAA and HITECH, and Business Associate provides diagnostic pulmonary testing, reporting, and portal management services that involve the creation, receipt, maintenance, or transmission of PHI;\n' +
+      'WHEREAS, the parties wish to comply with the requirements of 45 CFR Parts 160 and 164 governing Business Associate contracts;\n' +
+      'NOW, THEREFORE, the parties agree as follows:',
+      { lineGap: 3 }
+    );
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').text('1. DEFINITIONS');
+    doc.font('Helvetica').text(
+      'Terms used, but not otherwise defined, in this Agreement shall have the same meaning as those terms in 45 CFR § 160.103 and § 164.501, including "Breach", "Data Aggregation", "Designated Record Set", "Disclosure", "Health Care Operations", "Individual", "Minimum Necessary", "Notice of Privacy Practices", "Protected Health Information (PHI)", "Required by Law", "Secretary", "Security Incident", "Subcontractor", and "Unsecured PHI".',
+      { lineGap: 3 }
+    );
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').text('2. OBLIGATIONS AND ACTIVITIES OF BUSINESS ASSOCIATE');
+    doc.font('Helvetica').text(
+      'a. Permitted Uses and Disclosures: Business Associate agrees not to use or disclose Protected Health Information other than as permitted or required by this Agreement or as required by law.\n' +
+      'b. Safeguards: Business Associate shall use appropriate administrative, physical, and technical safeguards, and comply with Subpart C of 45 CFR Part 164 with respect to electronic PHI, to prevent use or disclosure of PHI other than as provided for by this Agreement.\n' +
+      'c. Reporting of Breaches and Incidents: Business Associate shall report to Covered Entity any use or disclosure of PHI not provided for by this Agreement, including breaches of unsecured PHI as required by 45 CFR § 164.410, without unreasonable delay and in no case later than 48 hours after discovery.\n' +
+      'd. Subcontractors: In accordance with 45 CFR § 164.502(e)(1)(ii) and § 164.308(b)(2), Business Associate shall ensure that any subcontractors that create, receive, maintain, or transmit PHI on behalf of Business Associate agree to the same restrictions and conditions that apply to Business Associate.',
+      { lineGap: 3 }
+    );
+
+    // --- PAGE 2: PERMITTED USES, TERMINATION & SIGNATURES ---
+    doc.addPage();
+    doc.font('Helvetica-Bold').text('3. PERMITTED USES AND DISCLOSURES BY BUSINESS ASSOCIATE');
+    doc.font('Helvetica').text(
+      'a. General Use: Business Associate may use or disclose PHI only to perform functions, activities, or services for, or on behalf of, Covered Entity as specified in portal service agreements, provided that such use or disclosure would not violate HIPAA if done by Covered Entity.\n' +
+      'b. Management and Administration: Business Associate may use PHI for the proper management and administration of Business Associate or to carry out its legal responsibilities.',
+      { lineGap: 3 }
+    );
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').text('4. OBLIGATIONS OF COVERED ENTITY');
+    doc.font('Helvetica').text(
+      'a. Covered Entity shall notify Business Associate of any limitation(s) in its Notice of Privacy Practices in accordance with 45 CFR § 164.520, to the extent that such limitation may affect Business Associate\'s use or disclosure of PHI.\n' +
+      'b. Covered Entity shall notify Business Associate of any restriction on the use or disclosure of PHI that Covered Entity has agreed to or is required to abide by under 45 CFR § 164.522.',
+      { lineGap: 3 }
+    );
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').text('5. TERM AND TERMINATION');
+    doc.font('Helvetica').text(
+      'a. Term: This Agreement shall be effective as of the date of electronic user authentication and portal onboarding, and shall terminate when all PHI provided by Covered Entity to Business Associate is destroyed or returned to Covered Entity.\n' +
+      'b. Termination for Cause: Covered Entity may terminate this Agreement and portal access immediately if Business Associate has violated a material term of this Agreement.\n' +
+      'c. Return or Destruction of PHI: Upon termination of this Agreement for any reason, Business Associate shall return or destroy all PHI received from Covered Entity, or created/received by Business Associate on behalf of Covered Entity, retaining no copies.',
+      { lineGap: 3 }
+    );
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').text('6. MISCELLANEOUS');
+    doc.font('Helvetica').text(
+      'a. Regulatory References: A reference in this Agreement to a section in the HIPAA Rules means the section as in effect or as amended.\n' +
+      'b. Governing Law: This Agreement shall be governed by and construed in accordance with the laws of the State of Ohio, without regard to conflict of law principles.',
+      { lineGap: 3 }
+    );
+    doc.moveDown(2);
+
+    doc.font('Helvetica-Bold').text('IN WITNESS WHEREOF, the parties have executed this Master Business Associate Agreement electronically.');
+    doc.moveDown(1.5);
+
+    doc.rect(50, doc.y, 512, 60).stroke('#cbd5e0');
+    doc.fontSize(9).fillColor('#1a2a47').font('Helvetica-Bold').text('ELECTRONIC ATTESTATION & DIGITAL RECORD', 65, doc.y + 10);
+    doc.font('Helvetica').fontSize(8).fillColor('#4a5568').text('Validated and cryptographically bound upon initial account login and checkbox agreement by authorized clinical representative.', 65, doc.y + 4);
+    doc.text('DirectCare Pulmonary Diagnostics LLC | HIPAA Compliance Verification Engine', 65, doc.y + 4);
+
+    doc.end();
+  } catch (err) {
+    console.error("Master BAA PDF generation error:", err);
+    res.status(500).json({ error: 'Failed to generate Master BAA PDF' });
+  }
+});
+
 // AUTOMATED SELF-SERVICE PASSWORD RESET ENDPOINT
 app.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
