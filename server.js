@@ -343,7 +343,39 @@ app.get('/api/clinics/:id/baa-pdf', verifyToken, async (req, res) => {
 
     const effectiveDate = new Date(clinic.baa_signed_date).toLocaleDateString();
 
-    // --- PAGE 1: TITLE & RECITALS ---
+    
+    // --- // UPDATE CLINIC DETAILS
+app.put('/api/clinics/:id', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  const { id } = req.params;
+  const { clinic_name, billing_email, phone_number, authorized_rep_email, address } = req.body;
+
+  try {
+    const query = `
+      UPDATE clinics 
+      SET clinic_name = $1, billing_email = $2, phone_number = $3, authorized_rep_email = $4, address = $5
+      WHERE clinic_id = $6 RETURNING *;
+    `;
+    const result = await pool.query(query, [clinic_name, billing_email, phone_number || null, authorized_rep_email || null, address || null, id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Clinic not found' });
+    res.json({ message: 'Clinic updated successfully', clinic: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update clinic: ' + err.message });
+  }
+});
+
+// DELETE CLINIC
+app.delete('/api/clinics/:id', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM clinics WHERE clinic_id = $1 RETURNING clinic_id', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Clinic not found' });
+    res.json({ message: 'Clinic deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete clinic' });
+  }
+});PAGE 1: TITLE & RECITALS ---
     doc.fontSize(16).fillColor('#002b5c').font('Helvetica-Bold').text('HIPAA BUSINESS ASSOCIATE AGREEMENT', { align: 'center' });
     doc.moveDown(1.5);
 
