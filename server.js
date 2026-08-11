@@ -48,6 +48,8 @@ async function initializeDatabase() {
         clinic_id SERIAL PRIMARY KEY,
         clinic_name VARCHAR(255) UNIQUE,
         billing_email VARCHAR(255),
+        phone_number VARCHAR(50),
+        authorized_rep_email VARCHAR(255),
         address TEXT,
         baa_signer_name VARCHAR(255),
         baa_signer_title VARCHAR(255),
@@ -114,6 +116,8 @@ async function initializeDatabase() {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signer_name VARCHAR(255);
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_ip_address VARCHAR(100);
       
+      ALTER TABLE clinics ADD COLUMN IF NOT EXISTS phone_number VARCHAR(50);
+      ALTER TABLE clinics ADD COLUMN IF NOT EXISTS authorized_rep_email VARCHAR(255);
       ALTER TABLE clinics ADD COLUMN IF NOT EXISTS baa_signer_name VARCHAR(255);
       ALTER TABLE clinics ADD COLUMN IF NOT EXISTS baa_signer_title VARCHAR(255);
       ALTER TABLE clinics ADD COLUMN IF NOT EXISTS baa_signature TEXT;
@@ -525,40 +529,6 @@ app.get('/api/clinics', verifyToken, async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch clinics' });
-  }
-});
-
-app.post('/api/clinics', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
-  
-  const { clinic_name, billing_email, address, baa_signer_name, baa_signer_title, baa_signature } = req.body;
-
-  if (!clinic_name || !billing_email) {
-    return res.status(400).json({ error: 'Clinic name and billing email are required.' });
-  }
-
-  if (!baa_signer_name || !baa_signature) {
-    return res.status(400).json({ error: 'Organizational BAA signature and signer details are required for compliance.' });
-  }
-
-  try {
-    const query = `
-      INSERT INTO clinics (clinic_name, billing_email, address, baa_signer_name, baa_signer_title, baa_signature, baa_signed_date)
-      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
-      ON CONFLICT (clinic_name) DO UPDATE SET 
-        billing_email = EXCLUDED.billing_email, 
-        address = EXCLUDED.address,
-        baa_signer_name = EXCLUDED.baa_signer_name,
-        baa_signer_title = EXCLUDED.baa_signer_title,
-        baa_signature = EXCLUDED.baa_signature,
-        baa_signed_date = CURRENT_TIMESTAMP
-      RETURNING *;
-    `;
-    const result = await pool.query(query, [clinic_name, billing_email, address, baa_signer_name, baa_signer_title, baa_signature]);
-    res.status(201).json({ message: 'Clinic and executed BAA saved successfully', clinic: result.rows[0] });
-  } catch (err) {
-    console.error("Clinic BAA save error:", err);
-    res.status(500).json({ error: 'Failed to save clinic account: ' + err.message });
   }
 });
 
@@ -976,7 +946,7 @@ app.post('/api/requests', verifyToken, async (req, res) => {
 
 app.get('/api/users', verifyToken, async (req, res) => {
   try {
-    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed FROM users ORDER BY user_id ASC');
+    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed, baa_signed_date, baa_signer_name, baa_ip_address FROM users ORDER BY user_id ASC');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -1123,4 +1093,3 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
 });
 
 app.listen(PORT, () => { console.log(`DirectCare API Server listening on port ${PORT}`); });
-
