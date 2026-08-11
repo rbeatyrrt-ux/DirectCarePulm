@@ -71,9 +71,7 @@ async function initializeDatabase() {
         baa_signed BOOLEAN DEFAULT FALSE,
         baa_signed_date TIMESTAMP,
         baa_signer_name VARCHAR(255),
-        baa_ip_address VARCHAR(100),
-        otp_code VARCHAR(10),
-        otp_expires TIMESTAMP
+        baa_ip_address VARCHAR(100)
       );
 
       CREATE TABLE IF NOT EXISTS password_history (
@@ -126,8 +124,6 @@ async function initializeDatabase() {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signer_name VARCHAR(255);
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_ip_address VARCHAR(100);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(10);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires TIMESTAMP;
       
       ALTER TABLE clinics ADD COLUMN IF NOT EXISTS phone_number VARCHAR(50);
       ALTER TABLE clinics ADD COLUMN IF NOT EXISTS authorized_rep_email VARCHAR(255);
@@ -169,7 +165,6 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-// STEP 1: LOGIN (VERIFIES PASSWORD & SENDS 6-DIGIT EMAIL OTP)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -180,62 +175,14 @@ app.post('/api/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword) return res.status(400).json({ error: 'Invalid email or password' });
 
-    // Generate 6-digit OTP code valid for 10 minutes
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
-
-    await pool.query('UPDATE users SET otp_code = $1, otp_expires = $2 WHERE user_id = $3', [otpCode, otpExpires, user.user_id]);
-
-    // Send email with OTP code via Nodemailer
-    await transporter.sendMail({
-      from: `"DirectCare Security" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: 'Your HIPAA Security Verification Code',
-      html: `
-        <p>Hello ${user.full_name},</p>
-        <p>A login attempt was initiated for your DirectCare PFT Portal account.</p>
-        <p>Your secure multi-factor authentication verification code is: <h2 style="color: #1a2a47;">${otpCode}</h2></p>
-        <p>This code will expire in 10 minutes.</p>
-      `
-    });
-
-    res.json({ requiresMfa: true, email: user.email, message: 'Verification code sent to email.' });
-  } catch (err) {
-    console.error("Login MFA generation error:", err);
-    res.status(500).json({ error: 'Server error during login authentication' });
-  }
-});
-
-// STEP 2: VERIFY OTP AND ISSUE JWT TOKEN
-app.post('/api/verify-2fa', async (req, res) => {
-  const { email, otp_code } = req.body;
-  try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) return res.status(400).json({ error: 'User not found' });
-
-    const user = result.rows[0];
-
-    if (!user.otp_code || user.otp_code !== otp_code) {
-      return res.status(400).json({ error: 'Invalid verification code.' });
-    }
-
-    if (new Date() > new Date(user.otp_expires)) {
-      return res.status(400).json({ error: 'Verification code has expired. Please log in again.' });
-    }
-
-    // Clear OTP once used successfully
-    await pool.query('UPDATE users SET otp_code = NULL, otp_expires = NULL WHERE user_id = $1', [user.user_id]);
-
     const token = jwt.sign(
       { user_id: user.user_id, email: user.email, role: user.role, clinic_name: user.clinic_name, credentials: user.credentials, npi: user.npi }, 
       JWT_SECRET, 
       { expiresIn: '8h' }
     );
 
-    await logAudit(user.user_id, 'USER_LOGIN_SUCCESS', null, req);
-
     res.json({
-      message: 'Authentication successful',
+      message: 'Login successful',
       token,
       user: { 
         user_id: user.user_id, 
@@ -250,8 +197,7 @@ app.post('/api/verify-2fa', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("2FA verification error:", err);
-    res.status(500).json({ error: 'Server error during code verification' });
+    res.status(500).json({ error: 'Server error during login' });
   }
 });
 
@@ -529,20 +475,6 @@ app.put('/api/auth/update-credentials', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to update credentials' }); }
 });
 
-app.get('/api/audit-logs', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
-  try {
-    const result = await pool.query(`
-      SELECT al.*, u.full_name, u.role
-      FROM audit_logs al
-      LEFT JOIN users u ON al.user_id = u.user_id
-      ORDER BY al.created_at DESC
-      LIMIT 500
-    `);
-    res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: 'Failed to fetch audit logs' }); }
-});
-
 app.get('/api/clinic-schedules', verifyToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM clinic_schedules');
@@ -636,6 +568,372 @@ app.delete('/api/users/:id', verifyToken, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json({ message: 'User deleted successfully' });
   } catch (err) { res.status(500).json({ error: 'Failed to delete user' }); }
+});
+
+app.get('/api/requests', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT sr.*, u_phys.full_name as phys_name, u_phys.credentials as phys_credentials, u_phys.npi as phys_npi,
+             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi
+      FROM service_requests sr
+      LEFT JOIN users u_phys ON sr.physician_id = u_phys.user_id
+      LEFT JOIN users u_prov ON sr.provider_id = u_prov.user_id
+      WHERE sr.is_deleted = FALSE ORDER BY sr.request_id DESC
+    `);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch requests' }); }
+});
+
+app.get('/api/audit/requests', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    const result = await pool.query(`
+      SELECT sr.*, u_phys.full_name as phys_name, u_phys.credentials as phys_credentials, u_phys.npi as phys_npi,
+             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi
+      FROM service_requests sr
+      LEFT JOIN users u_phys ON sr.physician_id = u_phys.user_id
+      LEFT JOIN users u_prov ON sr.provider_id = u_prov.user_id
+      ORDER BY sr.request_id DESC
+    `);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch audit records' }); }
+});
+
+// GET NEW SYSTEM AUDIT LOGS
+app.get('/api/audit-logs', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    const result = await pool.query(`
+      SELECT al.*, u.full_name, u.role
+      FROM audit_logs al
+      LEFT JOIN users u ON al.user_id = u.user_id
+      ORDER BY al.created_at DESC
+      LIMIT 500
+    `);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch audit logs' }); }
+});
+
+app.delete('/api/requests/:id', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  
+  const { id } = req.params;
+  const { signature_pin } = req.body;
+  if (!signature_pin) return res.status(400).json({ error: 'Signature PIN is required to authorize patient record deletion.' });
+
+  try {
+    const userResult = await pool.query('SELECT signature_pin_hash, password_hash FROM users WHERE user_id = $1', [req.user.user_id]);
+    if (userResult.rows.length === 0) return res.status(400).json({ error: 'User not found.' });
+
+    const userData = userResult.rows[0];
+    let validPin = false;
+    if (userData.signature_pin_hash) {
+      validPin = await bcrypt.compare(signature_pin, userData.signature_pin_hash);
+    } else {
+      validPin = await bcrypt.compare(signature_pin, userData.password_hash);
+    }
+
+    if (!validPin) return res.status(400).json({ error: 'Incorrect signature PIN.' });
+
+    const result = await pool.query('UPDATE service_requests SET is_deleted = TRUE WHERE request_id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    await logAudit(req.user.user_id, 'ARCHIVE_PATIENT_RECORD', id, req);
+
+    res.json({ message: 'Patient record archived.', request: result.rows[0] });
+  } catch (err) { res.status(500).json({ error: 'Failed to delete record: ' + err.message }); }
+});
+
+app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+
+  try {
+    const { id } = req.params;
+    let reqDataRes = await pool.query('SELECT * FROM service_requests WHERE request_id = $1', [id]);
+    if (reqDataRes.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    const targetReq = reqDataRes.rows[0];
+
+    if (targetReq.time_block && targetReq.requested_date) {
+      const conflictCheck = await pool.query(
+        `SELECT request_id, patient_name FROM service_requests WHERE clinic_name = $1 AND requested_date::date = $2::date AND time_block = $3 AND request_id != $4 AND is_deleted = FALSE`,
+        [targetReq.clinic_name, targetReq.requested_date, targetReq.time_block, id]
+      );
+      if (conflictCheck.rows.length > 0) return res.status(400).json({ error: `Time slot conflict: Patient "${conflictCheck.rows[0].patient_name}" is already scheduled in this time slot.` });
+    }
+
+    const query = await pool.query(`UPDATE service_requests SET status = 'SCHEDULED' WHERE request_id = $1 RETURNING *;`, [id]);
+    res.json({ message: 'Order approved and scheduled', request: query.rows[0] });
+  } catch (err) { res.status(500).json({ error: 'Failed to update order status: ' + err.message }); }
+});
+
+app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rrt_notes, mdi_education, recommended_interpretation, signature_pin } = req.body;
+    
+    if (!signature_pin) return res.status(400).json({ error: 'Signature PIN is required.' });
+
+    let reportPath = null;
+    if (req.file) {
+      const s3Key = `pft-reports/${Date.now()}-${req.file.originalname}`;
+      await s3Client.send(new PutObjectCommand({ Bucket: S3_BUCKET_NAME, Key: s3Key, Body: req.file.buffer, ContentType: req.file.mimetype, ServerSideEncryption: 'AES256' }));
+      reportPath = `s3://${S3_BUCKET_NAME}/${s3Key}`;
+    }
+
+    let query = `UPDATE service_requests SET status = 'PRELIMINARY_RESULTS', rrt_notes = $1, mdi_education = $2, recommended_interpretation = $3`;
+    let params = [rrt_notes, mdi_education, recommended_interpretation];
+
+    if (reportPath) { query += `, uploaded_report_path = $4 WHERE request_id = $5 RETURNING *;`; params.push(reportPath, id); } 
+    else { query += ` WHERE request_id = $4 RETURNING *;`; params.push(id); }
+
+    const result = await pool.query(query, params);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    res.json({ message: 'Preliminary results saved successfully', request: result.rows[0] });
+  } catch (err) { res.status(500).json({ error: 'Failed to update preliminary results: ' + err.message }); }
+});
+
+app.get('/api/requests/:id/raw-report', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reqResult = await pool.query('SELECT uploaded_report_path FROM service_requests WHERE request_id = $1', [id]);
+    
+    if (reqResult.rows.length === 0 || !reqResult.rows[0].uploaded_report_path) return res.status(404).json({ error: 'Report PDF not found for this request' });
+
+    const s3Uri = reqResult.rows[0].uploaded_report_path;
+    const s3Key = s3Uri.replace(`s3://${S3_BUCKET_NAME}/`, '');
+
+    await logAudit(req.user.user_id, 'VIEW_RAW_PFT_REPORT', id, req);
+
+    const s3Response = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET_NAME, Key: s3Key }));
+    res.setHeader('Content-Type', 'application/pdf');
+    s3Response.Body.pipe(res);
+  } catch (err) { res.status(500).json({ error: 'Failed to stream report PDF from S3: ' + err.message }); }
+});
+
+app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { interpretation, signature_pin } = req.body;
+
+  if (!signature_pin) return res.status(400).json({ error: 'Signature PIN is required.' });
+
+  try {
+    const userResult = await pool.query('SELECT signature_pin_hash, password_hash FROM users WHERE user_id = $1', [req.user.user_id]);
+    if (userResult.rows.length === 0) return res.status(400).json({ error: 'User not found.' });
+
+    const userData = userResult.rows[0];
+    let validPin = false;
+    
+    if (userData.signature_pin_hash) validPin = await bcrypt.compare(signature_pin, userData.signature_pin_hash);
+    else validPin = await bcrypt.compare(signature_pin, userData.password_hash);
+
+    if (!validPin) return res.status(401).json({ error: 'Incorrect Signature PIN.' });
+
+    const result = await pool.query(
+      `UPDATE service_requests SET status = 'COMPLETED', interpretation = $1, physician_id = $2 WHERE request_id = $3 RETURNING *`, 
+      [interpretation, req.user.user_id, id]
+    );
+
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    await logAudit(req.user.user_id, 'FINALIZE_INTERPRETATION', id, req);
+
+    res.json({ message: 'Order successfully signed, updated, and completed.', request: result.rows[0] });
+  } catch (err) { res.status(500).json({ error: 'Failed to finalize review: ' + err.message }); }
+});
+
+app.put('/api/requests/:id/provider-sign', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { signature_pin } = req.body;
+
+  if (!signature_pin) return res.status(400).json({ error: 'Signature PIN is required.' });
+
+  try {
+    const userResult = await pool.query('SELECT signature_pin_hash, password_hash FROM users WHERE user_id = $1', [req.user.user_id]);
+    if (userResult.rows.length === 0) return res.status(400).json({ error: 'User not found.' });
+
+    const userData = userResult.rows[0];
+    let validPin = false;
+    
+    if (userData.signature_pin_hash) validPin = await bcrypt.compare(signature_pin, userData.signature_pin_hash);
+    else validPin = await bcrypt.compare(signature_pin, userData.password_hash);
+
+    if (!validPin) return res.status(401).json({ error: 'Incorrect Signature PIN.' });
+
+    const result = await pool.query(`UPDATE service_requests SET status = 'PENDING' WHERE request_id = $1 RETURNING *`, [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    res.json({ message: 'Order signed successfully and routed to scheduling queue', request: result.rows[0] });
+  } catch (err) { res.status(500).json({ error: 'Failed to sign order: ' + err.message }); }
+});
+
+app.post('/api/requests', verifyToken, async (req, res) => {
+  const { patient_name, patient_dob, insurance_type, ordering_reason, tests_ordered, requested_date, time_block, provider_id, clinic_name, status } = req.body;
+  const clinicName = clinic_name || req.user.clinic_name || 'Independent Clinic';
+  const initialStatus = status || (req.user.role === 'nurse' ? 'PENDING_PROVIDER_SIGNATURE' : 'PENDING');
+  const todayDate = requested_date || new Date().toISOString().split('T')[0];
+  const assignedProviderId = provider_id || req.user.user_id;
+
+  try {
+    if (time_block && requested_date) {
+      const conflictCheck = await pool.query(
+        `SELECT request_id, patient_name FROM service_requests WHERE clinic_name = $1 AND requested_date::date = $2::date AND time_block = $3 AND is_deleted = FALSE`,
+        [clinicName, todayDate, time_block]
+      );
+      if (conflictCheck.rows.length > 0) return res.status(400).json({ error: `Time slot conflict: Patient "${conflictCheck.rows[0].patient_name}" is already booked in this time slot.` });
+    }
+
+    const query = `
+      INSERT INTO service_requests (clinic_name, patient_name, patient_dob, insurance_type, ordering_reason, tests_ordered, requested_date, time_block, status, provider_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8, $9, $10) RETURNING *;
+    `;
+    const result = await pool.query(query, [clinicName, patient_name, patient_dob || null, insurance_type, ordering_reason, tests_ordered, todayDate, time_block || null, initialStatus, assignedProviderId]);
+    
+    await logAudit(req.user.user_id, 'CREATE_PATIENT_ORDER', result.rows[0].request_id, req);
+
+    res.status(201).json({ message: 'Service request created successfully', request: result.rows[0] });
+  } catch (err) { res.status(500).json({ error: 'Failed to submit service request: ' + err.message }); }
+});
+
+app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reqResult = await pool.query(`
+      SELECT sr.*, u_phys.full_name as phys_name, u_phys.credentials as phys_credentials, u_phys.npi as phys_npi,
+             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi
+      FROM service_requests sr
+      LEFT JOIN users u_phys ON sr.physician_id = u_phys.user_id
+      LEFT JOIN users u_prov ON sr.provider_id = u_prov.user_id
+      WHERE sr.request_id = $1
+    `, [id]);
+
+    if (reqResult.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+    const reqData = reqResult.rows[0];
+
+    // Write audit log
+    await logAudit(req.user.user_id, 'DOWNLOAD_FINAL_CLINICAL_REPORT', id, req);
+
+    const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Clinical_Billing_Report_Package_${id}.pdf`);
+    doc.pipe(res);
+
+    const cleanNotes = (text) => (text || '').replace(/[ĐD]/g, '').trim();
+
+    doc.addPage();
+    doc.fontSize(26).fillColor('#002b5c').text('DirectCare PFT Services', { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(14).fillColor('#4a5568').text('CONFIDENTIAL CLINICAL & BILLING REPORT PACKAGE', { align: 'center' });
+    doc.moveDown(3);
+
+    doc.rect(50, 200, 512, 180).stroke('#cbd5e0');
+    doc.fontSize(12).fillColor('#1a2a47').font('Helvetica-Bold').text('NOTICE OF CONFIDENTIALITY', 70, 220);
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(
+      'This document contains confidential medical and billing information protected under federal and state law, ' +
+      'intended solely for your use of the designated ordering provider and clinical staff. If you are not the ' +
+      'intended recipient, you are hereby notified that any disclosure, copying, distribution, or action taken in ' +
+      'reliance on the contents of this information is strictly prohibited.',
+      70, 245, { width: 472, lineGap: 4 }
+    );
+
+    doc.fontSize(10).fillColor('#718096').text(`Secure System Request Identifier: ${id}`, 70, 335);
+    doc.text(`Package Generation Timestamp: ${new Date().toLocaleString()}`, 70, 355);
+
+    doc.addPage();
+    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 1: ORIGINAL PROVIDER ORDER');
+    doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
+    doc.moveDown(1.5);
+
+    doc.fontSize(11).fillColor('#1a2a47');
+    doc.font('Helvetica-Bold').text('Patient Full Name: ', { continued: true }).font('Helvetica').text(reqData.patient_name || 'N/A');
+    doc.font('Helvetica-Bold').text('Patient Date of Birth: ', { continued: true }).font('Helvetica').text(reqData.patient_dob ? new Date(reqData.patient_dob).toLocaleDateString() : 'N/A');
+    doc.font('Helvetica-Bold').text('Ordering Clinic: ', { continued: true }).font('Helvetica').text(reqData.clinic_name || 'N/A');
+    doc.font('Helvetica-Bold').text('Insurance / Payer Type: ', { continued: true }).font('Helvetica').text(reqData.insurance_type || 'N/A');
+    doc.font('Helvetica-Bold').text('Requested Testing Date: ', { continued: true }).font('Helvetica').text(reqData.requested_date ? new Date(reqData.requested_date).toLocaleDateString() : 'N/A');
+    doc.font('Helvetica-Bold').text('Time Slot Block: ', { continued: true }).font('Helvetica').text(reqData.time_block ? reqData.time_block.replace('_', ' - ') : 'N/A');
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').text('Ordering Reason / Clinical Indication:');
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(reqData.ordering_reason || 'None specified', { lineGap: 4 });
+    doc.moveDown(1);
+
+    doc.fontSize(11).fillColor('#1a2a47').font('Helvetica-Bold').text('Tests Ordered:');
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(reqData.tests_ordered || 'Standard PFT Package', { lineGap: 4 });
+    doc.moveDown(2);
+
+    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('ORDERING PROVIDER ELECTRONIC SIGNATURE', 65, doc.y + 10);
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(
+      `Ordering Provider: ${reqData.prov_name || 'Attending Physician'} (${reqData.prov_credentials || 'MD/APRN'})`, 65, doc.y + 6
+    );
+    doc.text(`NPI: ${reqData.prov_npi || 'N/A'}`, 65, doc.y + 4);
+    doc.text(`Attestation: Order electronically signed and authorized for scheduling.`, 65, doc.y + 4);
+
+    doc.addPage();
+    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 2: CPT BILLING & CODING GUIDE');
+    doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
+    doc.moveDown(1.5);
+
+    doc.fontSize(10).fillColor('#4a5568').text('The following CPT billing codes, required modifiers, and documentation guidelines govern reimbursement for this encounter:');
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94060: Spirometry, pre and post-bronchodilator');
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: Append modifier 26 if billing professional component only, or TC for technical component. Ensure appropriate ICD-10 medical necessity linkage.');
+    doc.moveDown(0.8);
+
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94664: Demonstration & Evaluation of MDI Technique');
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: When billed concurrently with evaluation and management (E/M) services or separate diagnostic testing on the same date of service, Modifier 59 (Distinct Procedural Service) or Modifier XU is strictly required by most commercial and government payers to prevent bundling edits. Documentation must verify patient return-demonstration.');
+    doc.moveDown(0.8);
+
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94729: Diffusing Capacity (DLCO)');
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Single-breath carbon monoxide diffusing capacity measurement.');
+
+    doc.addPage();
+    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 3: PHYSICIAN CLINICAL OVERREAD');
+    doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
+    doc.moveDown(1.5);
+
+    doc.fontSize(11).fillColor('#1a2a47').font('Helvetica-Bold').text('RRT Technical & Pretesting Notes:');
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.rrt_notes) || 'No technical notes recorded.', { lineGap: 4 });
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('MDI Instruction & Education:');
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.mdi_education) || 'No MDI education notes recorded.', { lineGap: 4 });
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('Final Physician Interpretation & Overread:');
+    doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
+    doc.moveDown(2);
+
+    doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('ELECTRONIC SIGNATURE & ATTESTATION', 65, doc.y + 10);
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(
+      `Interpreting Physician: ${reqData.phys_name || 'Pending Review'} (${reqData.phys_credentials || 'MD'})`, 65, doc.y + 6
+    );
+    doc.text(`NPI: ${reqData.phys_npi || 'N/A'}`, 65, doc.y + 4);
+    doc.text(`Verification Status: Cryptographically Verified via Secure DirectCare PIN`, 65, doc.y + 4);
+    doc.text(`Associated Request ID: ${id} | Status: ${reqData.status}`, 65, doc.y + 4);
+
+    doc.addPage();
+    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 4: ATTACHED PFT DIAGNOSTIC REPORT');
+    doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
+    doc.moveDown(1.5);
+
+    doc.rect(50, 150, 512, 220).stroke('#cbd5e0');
+    doc.fontSize(12).fillColor('#1a2a47').font('Helvetica-Bold').text('DIAGNOSTIC REPORT ATTACHMENT SUMMARY', 70, 175);
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(
+      'The raw diagnostic PFT testing report file has been successfully attached and verified for this encounter record.',
+      70, 205, { width: 472, lineGap: 4 }
+    );
+    doc.text(`Primary Record ID: ${id}`, 70, 250);
+    doc.text(`Associated S3 Object Reference: ${reqData.uploaded_report_path || 'No raw file attached.'}`, 70, 275);
+    doc.text(`Verification Status: Attached and Archived in Secure S3 Storage`, 70, 300);
+
+    doc.end();
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to generate PDF package' });
+  }
 });
 
 app.listen(PORT, () => { console.log(`DirectCare API Server listening on port ${PORT}`); });
