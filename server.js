@@ -1059,11 +1059,3 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
 
 app.listen(PORT, () => { console.log(`DirectCare API Server listening on port ${PORT}`); });
 
-app.get('/api/debug/reset-baa/:email', async (req, res) => {
-  try {
-    await pool.query('UPDATE users SET baa_signed = FALSE WHERE email = $1', [req.params.email]);
-    res.json({ success: true, message: `BAA reset for ${req.params.email}` });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
