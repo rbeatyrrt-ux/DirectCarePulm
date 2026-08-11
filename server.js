@@ -111,6 +111,15 @@ async function initializeDatabase() {
         requested_date_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        log_id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+        action VARCHAR(255),
+        record_id INT,
+        ip_address VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_dob DATE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed BOOLEAN DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
@@ -131,6 +140,19 @@ async function initializeDatabase() {
 }
 
 initializeDatabase();
+
+// SILENT HIPAA AUDIT LOGGER
+async function logAudit(userId, action, recordId, req) {
+  const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown';
+  try {
+    await pool.query(
+      'INSERT INTO audit_logs (user_id, action, record_id, ip_address) VALUES ($1, $2, $3, $4)',
+      [userId, action, recordId, ipAddress]
+    );
+  } catch (err) {
+    console.error("Audit logging failed:", err);
+  }
+}
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -810,8 +832,9 @@ app.delete('/api/requests/:id', verifyToken, async (req, res) => {
     if (!validPin) return res.status(400).json({ error: 'Incorrect signature PIN.' });
 
     const result = await pool.query('UPDATE service_requests SET is_deleted = TRUE WHERE request_id = $1 RETURNING *', [id]);
-
     if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    await logAudit(req.user.user_id, 'ARCHIVE_PATIENT_RECORD', id, req);
 
     res.json({ message: 'Patient record archived.', request: result.rows[0] });
   } catch (err) {
@@ -914,6 +937,9 @@ app.get('/api/requests/:id/raw-report', verifyToken, async (req, res) => {
       Key: s3Key
     });
 
+    // Write audit log
+    await logAudit(req.user.user_id, 'VIEW_RAW_PFT_REPORT', id, req);
+
     const s3Response = await s3Client.send(command);
     res.setHeader('Content-Type', 'application/pdf');
     s3Response.Body.pipe(res);
@@ -955,6 +981,8 @@ app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
     );
 
     if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+
+    await logAudit(req.user.user_id, 'FINALIZE_INTERPRETATION', id, req);
 
     res.json({ message: 'Order successfully signed, updated, and completed.', request: result.rows[0] });
   } catch (err) {
@@ -1030,19 +1058,13 @@ app.post('/api/requests', verifyToken, async (req, res) => {
       RETURNING *;
     `;
     const result = await pool.query(query, [clinicName, patient_name, patient_dob || null, insurance_type, ordering_reason, tests_ordered, todayDate, time_block || null, initialStatus, assignedProviderId]);
+    
+    await logAudit(req.user.user_id, 'CREATE_PATIENT_ORDER', result.rows[0].request_id, req);
+
     res.status(201).json({ message: 'Service request created successfully', request: result.rows[0] });
   } catch (err) {
     console.error("Order creation error:", err);
     res.status(500).json({ error: 'Failed to submit service request: ' + err.message });
-  }
-});
-
-app.get('/api/users', verifyToken, async (req, res) => {
-  try {
-    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed, baa_signed_date, baa_signer_name, baa_ip_address FROM users ORDER BY user_id ASC');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch users' });
   }
 });
 
@@ -1061,6 +1083,9 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
 
     if (reqResult.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
     const reqData = reqResult.rows[0];
+
+    // Write audit log
+    await logAudit(req.user.user_id, 'DOWNLOAD_FINAL_CLINICAL_REPORT', id, req);
 
     const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
     res.setHeader('Content-Type', 'application/pdf');
