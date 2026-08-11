@@ -327,18 +327,37 @@ app.get('/api/auth/signed-baa-pdf', verifyToken, async (req, res) => {
 // MASTER IRON-CLAD BAA PDF GENERATOR ENDPOINT
 app.get('/api/master-baa-pdf', verifyToken, async (req, res) => {
   try {
+    const { 
+      clinic_name = 'Participating Healthcare Entity', 
+      address = 'Address on file', 
+      phone = 'N/A', 
+      auth_rep_email = 'N/A',
+      signer_name = 'Authorized Representative',
+      signer_title = 'Practice Manager'
+    } = req.query;
+
     const doc = new PDFDocument({ margin: 50, autoFirstPage: true });
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=DirectCare_Master_Business_Associate_Agreement.pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=BAA_${clinic_name.replace(/\s+/g, '_')}.pdf`);
     doc.pipe(res);
 
-    // --- PAGE 1: TITLE & RECITALS ---
+    // --- PAGE 1: TITLE, COVER ENTITY DETAILS & RECITALS ---
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('BUSINESS ASSOCIATE AGREEMENT', { align: 'center' });
     doc.fontSize(11).fillColor('#4a5568').font('Helvetica').text('PURSUANT TO HIPAA / HITECH REGULATIONS', { align: 'center' });
     doc.moveDown(1.5);
 
+    // Covered Entity Details Block
+    doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
+    const startY = doc.y + 8;
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('COVERED ENTITY / CLINIC PROFILE', 65, startY);
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
+    doc.text(`Clinic Name: ${clinic_name}`, 65, doc.y + 6);
+    doc.text(`Address: ${address}`, 65, doc.y + 4);
+    doc.text(`Phone: ${phone} | Representative Email: ${auth_rep_email}`, 65, doc.y + 4);
+    doc.moveDown(2.5);
+
     doc.fontSize(9).fillColor('#2d3748').text(
-      'This Business Associate Agreement ("Agreement") is entered into by and between DirectCare Pulmonary Diagnostics LLC ("Business Associate") and the participating healthcare practice, clinic, or ordering provider ("Covered Entity"). This Agreement is executed to ensure compliance with the administrative simplification provisions of the Health Insurance Portability and Accountability Act of 1996 (HIPAA), the Health Information Technology for Economic and Clinical Health (HITECH) Act (P.L. 111-5), and implementing regulations promulgated thereunder.',
+      'This Business Associate Agreement ("Agreement") is entered into by and between DirectCare Pulmonary Diagnostics LLC ("Business Associate") and the healthcare practice or clinic specified above ("Covered Entity"). This Agreement is executed to ensure compliance with the administrative simplification provisions of the Health Insurance Portability and Accountability Act of 1996 (HIPAA), the Health Information Technology for Economic and Clinical Health (HITECH) Act (P.L. 111-5), and implementing regulations promulgated thereunder.',
       { lineGap: 3 }
     );
     doc.moveDown(1);
@@ -406,10 +425,10 @@ app.get('/api/master-baa-pdf', verifyToken, async (req, res) => {
     doc.font('Helvetica-Bold').text('IN WITNESS WHEREOF, the parties have executed this Master Business Associate Agreement electronically.');
     doc.moveDown(1.5);
 
-    doc.rect(50, doc.y, 512, 60).stroke('#cbd5e0');
+    doc.rect(50, doc.y, 512, 70).stroke('#cbd5e0');
     doc.fontSize(9).fillColor('#1a2a47').font('Helvetica-Bold').text('ELECTRONIC ATTESTATION & DIGITAL RECORD', 65, doc.y + 10);
-    doc.font('Helvetica').fontSize(8).fillColor('#4a5568').text('Validated and cryptographically bound upon initial account login and checkbox agreement by authorized clinical representative.', 65, doc.y + 4);
-    doc.text('DirectCare Pulmonary Diagnostics LLC | HIPAA Compliance Verification Engine', 65, doc.y + 4);
+    doc.font('Helvetica').fontSize(8).fillColor('#4a5568').text(`Executed For: ${clinic_name} | Representative: ${signer_name} (${signer_title})`, 65, doc.y + 4);
+    doc.text(`Timestamp: ${new Date().toLocaleString()} | DirectCare Compliance Verification Engine`, 65, doc.y + 4);
 
     doc.end();
   } catch (err) {
