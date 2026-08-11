@@ -333,7 +333,7 @@ app.get('/api/master-baa-pdf', verifyToken, async (req, res) => {
       phone = 'N/A', 
       auth_rep_email = 'N/A',
       signer_name = 'Authorized Representative',
-      signer_title = 'Practice Manager'
+      signer_title = 'Practice Management'
     } = req.query;
 
     const doc = new PDFDocument({ margin: 50, autoFirstPage: true });
@@ -341,94 +341,129 @@ app.get('/api/master-baa-pdf', verifyToken, async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename=BAA_${clinic_name.replace(/\s+/g, '_')}.pdf`);
     doc.pipe(res);
 
-    // --- PAGE 1: TITLE, COVER ENTITY DETAILS & RECITALS ---
-    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('BUSINESS ASSOCIATE AGREEMENT', { align: 'center' });
-    doc.fontSize(11).fillColor('#4a5568').font('Helvetica').text('PURSUANT TO HIPAA / HITECH REGULATIONS', { align: 'center' });
+    const effectiveDate = new Date().toLocaleDateString();
+
+    // --- PAGE 1: TITLE & RECITALS ---
+    doc.fontSize(16).fillColor('#002b5c').font('Helvetica-Bold').text('HIPAA BUSINESS ASSOCIATE AGREEMENT', { align: 'center' });
     doc.moveDown(1.5);
 
-    // Covered Entity Details Block
-    doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
-    const startY = doc.y + 8;
-    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('COVERED ENTITY / CLINIC PROFILE', 65, startY);
-    doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
-    doc.text(`Clinic Name: ${clinic_name}`, 65, doc.y + 6);
-    doc.text(`Address: ${address}`, 65, doc.y + 4);
-    doc.text(`Phone: ${phone} | Representative Email: ${auth_rep_email}`, 65, doc.y + 4);
-    doc.moveDown(2.5);
-
-    doc.fontSize(9).fillColor('#2d3748').text(
-      'This Business Associate Agreement ("Agreement") is entered into by and between DirectCare Pulmonary Diagnostics LLC ("Business Associate") and the healthcare practice or clinic specified above ("Covered Entity"). This Agreement is executed to ensure compliance with the administrative simplification provisions of the Health Insurance Portability and Accountability Act of 1996 (HIPAA), the Health Information Technology for Economic and Clinical Health (HITECH) Act (P.L. 111-5), and implementing regulations promulgated thereunder.',
-      { lineGap: 3 }
+    doc.fontSize(9).fillColor('#2d3748').font('Helvetica').text(
+      `This HIPAA Business Associate Agreement (“Agreement”) is entered into as of ${effectiveDate} (“Effective Date”) by and between ${clinic_name}, a participating healthcare entity (“Covered Entity”), and DirectCare Pulmonary Diagnostics LLC, an Ohio limited liability company (“Business Associate”).`,
+      { align: 'justify', lineGap: 3 }
     );
     doc.moveDown(1);
 
     doc.font('Helvetica-Bold').text('RECITALS');
     doc.font('Helvetica').text(
-      'WHEREAS, Covered Entity possesses Protected Health Information (PHI) that is protected under HIPAA and HITECH, and Business Associate provides diagnostic pulmonary testing, reporting, and portal management services that involve the creation, receipt, maintenance, or transmission of PHI;\n' +
-      'WHEREAS, the parties wish to comply with the requirements of 45 CFR Parts 160 and 164 governing Business Associate contracts;\n' +
-      'NOW, THEREFORE, the parties agree as follows:',
-      { lineGap: 3 }
+      'WHEREAS, Business Associate provides certain services to Covered Entity that involve the use and/or disclosure of Protected Health Information (“PHI”);\n' +
+      'WHEREAS, Covered Entity is a “covered entity” as defined in the Health Insurance Portability and Accountability Act of 1996 (“HIPAA”) and the regulations promulgated thereunder;\n' +
+      'WHEREAS, Business Associate is a “business associate” as defined in HIPAA and the HIPAA Rules (as defined below); and\n' +
+      'WHEREAS, Covered Entity is required under HIPAA to obtain satisfactory assurances that Business Associate will appropriately safeguard PHI it receives, creates, maintains, or transmits on behalf of Covered Entity.\n' +
+      'NOW, THEREFORE, in consideration of the mutual promises set forth herein and other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the parties agree as follows:',
+      { align: 'justify', lineGap: 3 }
     );
     doc.moveDown(1);
 
-    doc.font('Helvetica-Bold').text('1. DEFINITIONS');
+    doc.font('Helvetica-Bold').text('1. Definitions');
     doc.font('Helvetica').text(
-      'Terms used, but not otherwise defined, in this Agreement shall have the same meaning as those terms in 45 CFR § 160.103 and § 164.501, including "Breach", "Data Aggregation", "Designated Record Set", "Disclosure", "Health Care Operations", "Individual", "Minimum Necessary", "Notice of Privacy Practices", "Protected Health Information (PHI)", "Required by Law", "Secretary", "Security Incident", "Subcontractor", and "Unsecured PHI".',
-      { lineGap: 3 }
+      '1.1 “HIPAA Rules” means, collectively, the Privacy Rule, Security Rule, Breach Notification Rule, and Enforcement Rule at 45 C.F.R. Parts 160 and 164.\n' +
+      '1.2 “Business Associate” has the meaning set forth at 45 C.F.R. § 160.103 and, for purposes of this Agreement, refers to the entity identified above as Business Associate.\n' +
+      '1.3 “Covered Entity” has the meaning set forth at 45 C.F.R. § 160.103 and, for purposes of this Agreement, refers to the entity identified above as Covered Entity.\n' +
+      '1.4 “Protected Health Information” or “PHI” has the meaning set forth at 45 C.F.R. § 160.103, and for purposes of this Agreement includes all individually identifiable health information created, received, maintained, or transmitted by Business Associate on behalf of Covered Entity, in any form or medium.\n' +
+      '1.5 “Electronic Protected Health Information” or “ePHI” means PHI that is transmitted or maintained in electronic media, as defined at 45 C.F.R. § 160.103.\n' +
+      '1.6 “Breach” has the meaning set forth at 45 C.F.R. § 164.402, and refers to the acquisition, access, use, or disclosure of unsecured PHI in a manner not permitted under the HIPAA Rules that compromises the security or privacy of the PHI.\n' +
+      '1.7 “Unsecured PHI” has the meaning set forth at 45 C.F.R. § 164.402, and refers to PHI that is not rendered unusable, unreadable, or indecipherable to unauthorized individuals through the use of a technology or methodology specified by the Secretary of the U.S. Department of Health and Human Services (“HHS”).\n' +
+      '1.8 “Security Incident” has the meaning set forth at 45 C.F.R. § 164.304.\n' +
+      '1.9 “Secretary” means the Secretary of HHS or the Secretary’s designee.\n' +
+      '1.10 Capitalized terms used but not otherwise defined in this Agreement shall have the meanings given to them in the HIPAA Rules.',
+      { align: 'justify', lineGap: 3 }
     );
     doc.moveDown(1);
 
-    doc.font('Helvetica-Bold').text('2. OBLIGATIONS AND ACTIVITIES OF BUSINESS ASSOCIATE');
+    doc.font('Helvetica-Bold').text('2. Obligations and Activities of Business Associate');
     doc.font('Helvetica').text(
-      'a. Permitted Uses and Disclosures: Business Associate agrees not to use or disclose Protected Health Information other than as permitted or required by this Agreement or as required by law.\n' +
-      'b. Safeguards: Business Associate shall use appropriate administrative, physical, and technical safeguards, and comply with Subpart C of 45 CFR Part 164 with respect to electronic PHI, to prevent use or disclosure of PHI other than as provided for by this Agreement.\n' +
-      'c. Reporting of Breaches and Incidents: Business Associate shall report to Covered Entity any use or disclosure of PHI not provided for by this Agreement, including breaches of unsecured PHI as required by 45 CFR § 164.410, without unreasonable delay and in no case later than 48 hours after discovery.\n' +
-      'd. Subcontractors: In accordance with 45 CFR § 164.502(e)(1)(ii) and § 164.308(b)(2), Business Associate shall ensure that any subcontractors that create, receive, maintain, or transmit PHI on behalf of Business Associate agree to the same restrictions and conditions that apply to Business Associate.',
-      { lineGap: 3 }
+      '2.1 Permitted Use and Disclosure. Business Associate shall not use or disclose PHI other than as permitted or required by this Agreement, as permitted or required by applicable law, or as otherwise authorized in writing by Covered Entity.\n' +
+      '2.2 Safeguards. Business Associate shall use appropriate administrative, physical, and technical safeguards, including a risk analysis and risk management program, access controls, and workforce security measures, to prevent the use or disclosure of PHI other than as provided for by this Agreement. With respect to ePHI, Business Associate shall comply with the applicable requirements of the Security Rule at 45 C.F.R. Part 164, Subpart C.\n' +
+      '2.3 Mitigation. Business Associate shall mitigate, to the extent practicable, any harmful effect that is known to Business Associate of a use or disclosure of PHI by Business Associate or its employees, agents, or subcontractors in violation of this Agreement or the HIPAA Rules.\n' +
+      '2.4 Reporting of Breaches and Security Incidents. Business Associate shall report to Covered Entity any Breach of Unsecured PHI in accordance with 45 C.F.R. § 164.410 and any Security Incident that results in unauthorized access, use, or disclosure of PHI. Such report shall be made without unreasonable delay and in no case later than 15 calendar days after discovery of the Breach or Security Incident. The report shall include, to the extent available, the information required by 45 C.F.R. § 164.410(c), and any additional information reasonably requested by Covered Entity.\n' +
+      '2.5 Subcontractors and Agents. Business Associate shall ensure that any subcontractor, agent, or other third party to whom it provides PHI on behalf of Covered Entity agrees in writing to the same restrictions, conditions, and requirements that apply to Business Associate with respect to such PHI, including compliance with the applicable provisions of the HIPAA Rules.\n' +
+      '2.6 Access to PHI. To the extent Business Associate maintains PHI in a Designated Record Set, Business Associate shall make such PHI available to Covered Entity, or, at Covered Entity’s direction, to the individual who is the subject of the PHI, in order to meet Covered Entity’s obligations under 45 C.F.R. § 164.524. Such access shall be provided within the time frames required by the HIPAA Rules and as reasonably requested by Covered Entity.\n' +
+      '2.7 Amendment of PHI. To the extent Business Associate maintains PHI in a Designated Record Set, Business Associate shall make such PHI available for amendment and shall incorporate any amendments to PHI as directed by Covered Entity in accordance with 45 C.F.R. § 164.526.\n' +
+      '2.8 Accounting of Disclosures. Business Associate shall maintain and, within a reasonable time following Covered Entity’s written request, provide to Covered Entity such information as is necessary to permit Covered Entity to provide an accounting of disclosures of PHI in accordance with 45 C.F.R. § 164.528.\n' +
+      '2.9 Internal Practices, Books, and Records. Business Associate shall make its internal practices, books, and records relating to the use and disclosure of PHI received from, or created or received by Business Associate on behalf of, Covered Entity available to the Secretary for purposes of determining Covered Entity’s compliance with the HIPAA Rules. To the extent permitted by law, Business Associate shall promptly notify Covered Entity of any such request, unless such notice is prohibited by law.\n' +
+      '2.10 Compliance with Law. Business Associate shall comply with the HIPAA Rules and any other applicable federal or state laws and regulations governing the privacy or security of PHI, including any amendments to HIPAA or such laws that affect Business Associate’s obligations under this Agreement.',
+      { align: 'justify', lineGap: 3 }
     );
-
-    // --- PAGE 2: PERMITTED USES, TERMINATION & SIGNATURES ---
+    
     doc.addPage();
-    doc.font('Helvetica-Bold').text('3. PERMITTED USES AND DISCLOSURES BY BUSINESS ASSOCIATE');
+
+    doc.font('Helvetica-Bold').text('3. Workforce Training and Security Awareness');
     doc.font('Helvetica').text(
-      'a. General Use: Business Associate may use or disclose PHI only to perform functions, activities, or services for, or on behalf of, Covered Entity as specified in portal service agreements, provided that such use or disclosure would not violate HIPAA if done by Covered Entity.\n' +
-      'b. Management and Administration: Business Associate may use PHI for the proper management and administration of Business Associate or to carry out its legal responsibilities.',
-      { lineGap: 3 }
+      '3.1 HIPAA Privacy Training. Business Associate shall provide training on the requirements of the HIPAA Privacy Rule and on Business Associate’s related policies and procedures to all members of its workforce who create, receive, maintain, or transmit PHI on behalf of Business Associate. Such training shall be provided as necessary and appropriate for the members of the workforce to carry out their functions, in accordance with 45 C.F.R. § 164.530(b)(1) of the HIPAA Privacy Rule. Business Associate shall document that the training has been provided.\n' +
+      '3.2 Security Awareness and Training. Business Associate shall implement a security awareness and training program for all members of its workforce, including management, in accordance with 45 C.F.R. § 164.308(a)(5) of the HIPAA Security Rule. Such program shall include, as appropriate, security reminders, protection from malicious software, log-in monitoring, and password management. Business Associate shall document that such training and related security measures have been implemented.',
+      { align: 'justify', lineGap: 3 }
     );
     doc.moveDown(1);
 
-    doc.font('Helvetica-Bold').text('4. OBLIGATIONS OF COVERED ENTITY');
+    doc.font('Helvetica-Bold').text('4. Permitted Uses and Disclosures by Business Associate');
     doc.font('Helvetica').text(
-      'a. Covered Entity shall notify Business Associate of any limitation(s) in its Notice of Privacy Practices in accordance with 45 CFR § 164.520, to the extent that such limitation may affect Business Associate\'s use or disclosure of PHI.\n' +
-      'b. Covered Entity shall notify Business Associate of any restriction on the use or disclosure of PHI that Covered Entity has agreed to or is required to abide by under 45 CFR § 164.522.',
-      { lineGap: 3 }
+      '4.1 Services for Covered Entity. Except as otherwise limited by this Agreement or applicable law, Business Associate may use or disclose PHI only as necessary to perform the services set forth in the underlying agreement(s) between Covered Entity and Business Associate. In performing such services, Business Associate shall request, use, and disclose only the minimum necessary PHI required to accomplish the intended purpose, consistent with 45 C.F.R. § 164.502(b).\n' +
+      '4.2 Use for Proper Management and Administration. Business Associate may use PHI for its proper management and administration or to carry out its legal responsibilities, provided that such use is permitted by the HIPAA Rules and applicable law.\n' +
+      '4.3 Disclosures for Proper Management and Administration. Business Associate may disclose PHI for its proper management and administration or to carry out its legal responsibilities, provided that (a) the disclosures are required by law, or (b) Business Associate obtains reasonable assurances from the person to whom the PHI is disclosed that the PHI will be held confidentially and used or further disclosed only as required by law or for the purpose for which it was disclosed, and that the person will notify Business Associate of any instance of which it becomes aware in which the confidentiality of the PHI has been breached.\n' +
+      '4.4 De-identified Information. Business Associate may de-identify PHI in accordance with 45 C.F.R. § 164.514(a)–(c). PHI that has been de-identified in accordance with such regulations is no longer subject to this Agreement, and Business Associate may use or disclose such de-identified information for any lawful purpose, provided that Business Associate does not attempt to re-identify the information or contact the individuals who are the subject of the information.\n' +
+      '4.5 Prohibited Uses and Disclosures. Business Associate shall not sell PHI or use PHI for marketing or fundraising purposes in a manner that would violate the HIPAA Rules or other applicable law if done by Covered Entity, unless expressly authorized in writing by Covered Entity and, if required by law, by the individual whose PHI is used or disclosed.',
+      { align: 'justify', lineGap: 3 }
     );
     doc.moveDown(1);
 
-    doc.font('Helvetica-Bold').text('5. TERM AND TERMINATION');
+    doc.font('Helvetica-Bold').text('5. Term and Termination');
     doc.font('Helvetica').text(
-      'a. Term: This Agreement shall be effective as of the date of electronic user authentication and portal onboarding, and shall terminate when all PHI provided by Covered Entity to Business Associate is destroyed or returned to Covered Entity.\n' +
-      'b. Termination for Cause: Covered Entity may terminate this Agreement and portal access immediately if Business Associate has violated a material term of this Agreement.\n' +
-      'c. Return or Destruction of PHI: Upon termination of this Agreement for any reason, Business Associate shall return or destroy all PHI received from Covered Entity, or created/received by Business Associate on behalf of Covered Entity, retaining no copies.',
-      { lineGap: 3 }
+      '5.1 Term. This Agreement shall become effective as of the Effective Date and shall remain in effect until terminated in accordance with this Section 5 or the termination or expiration of all underlying service agreement(s) between Covered Entity and Business Associate, whichever occurs first.\n' +
+      '5.2 Termination for Cause. Covered Entity may terminate this Agreement and any related services agreement(s) immediately if it determines that Business Associate has materially breached this Agreement and Business Associate has not cured the breach within thirty (30) days after receiving written notice from Covered Entity specifying the nature of the breach, if the breach is reasonably capable of cure. If cure is not possible, Covered Entity may terminate this Agreement immediately upon written notice to Business Associate.\n' +
+      '5.3 Other Termination Rights. Business Associate may terminate this Agreement upon written notice to Covered Entity if Business Associate reasonably determines that continuing to perform under this Agreement would cause Business Associate to violate the HIPAA Rules or other applicable law and the parties are unable, after good faith negotiations, to amend this Agreement to prevent such violation.\n' +
+      '5.4 Obligations of Business Associate Upon Termination. Upon termination or expiration of this Agreement for any reason, Business Associate shall, with respect to PHI received from Covered Entity, or created, maintained, or received by Business Associate on behalf of Covered Entity, (a) retain only that PHI which is necessary for Business Associate to continue its proper management and administration or to carry out its legal responsibilities; (b) return to Covered Entity or, if agreed to by Covered Entity, destroy all remaining PHI that Business Associate still maintains in any form; (c) continue to use appropriate safeguards and comply with the HIPAA Rules with respect to such PHI for as long as Business Associate retains it; and (d) not use or disclose such PHI other than for the purposes that make the return or destruction infeasible, or as required by law.\n' +
+      '5.5 Infeasibility of Return or Destruction. If Business Associate determines that returning or destroying PHI is infeasible, Business Associate shall provide to Covered Entity written notification of the conditions that make return or destruction infeasible. If Covered Entity agrees that return or destruction of PHI is infeasible, Business Associate shall extend the protections of this Agreement to such PHI and limit further uses and disclosures of such PHI to those purposes that make the return or destruction infeasible, for so long as Business Associate maintains such PHI.\n' +
+      '5.6 Reporting to HHS. If Covered Entity determines that termination of this Agreement is not feasible, Covered Entity shall report the violation to the Secretary, in accordance with 45 C.F.R. § 164.504(e)(1)(ii).',
+      { align: 'justify', lineGap: 3 }
     );
-    doc.moveDown(1);
+    
+    doc.addPage();
 
-    doc.font('Helvetica-Bold').text('6. MISCELLANEOUS');
+    doc.font('Helvetica-Bold').text('6. Miscellaneous');
     doc.font('Helvetica').text(
-      'a. Regulatory References: A reference in this Agreement to a section in the HIPAA Rules means the section as in effect or as amended.\n' +
-      'b. Governing Law: This Agreement shall be governed by and construed in accordance with the laws of the State of Ohio, without regard to conflict of law principles.',
-      { lineGap: 3 }
+      '6.1 Amendment. The parties agree to take such action as is necessary to amend this Agreement from time to time as may be required to comply with the requirements of HIPAA, the HIPAA Rules, and any other applicable law or regulation. Any such amendment shall be in writing and signed by both parties.\n' +
+      '6.2 Survival. The respective rights and obligations of Business Associate and Covered Entity under this Agreement that, by their nature, are intended to survive termination or expiration of this Agreement, including without limitation the provisions of Sections 2, 3, 4, 5.4, 5.5, and this Section 6, shall survive such termination or expiration.\n' +
+      '6.3 Interpretation. Any ambiguity in this Agreement shall be resolved to permit compliance with the HIPAA Rules. In the event of a conflict between the terms of this Agreement and the terms of any other agreement between the parties, this Agreement shall control with respect to the subject matter of this Agreement and the parties’ respective obligations regarding PHI.\n' +
+      '6.4 Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Ohio, without regard to its conflict-of-law principles, except to the extent preempted by federal law including HIPAA.\n' +
+      '6.5 Indemnification. Business Associate shall indemnify, defend, and hold harmless Covered Entity and its directors, officers, employees, and agents from and against any and all claims, damages, fines, penalties, costs, and expenses (including reasonable attorneys’ fees) arising out of or relating to (a) Business Associate’s breach of this Agreement; or (b) Business Associate’s violation of the HIPAA Rules or other applicable law relating to PHI, except to the extent caused by Covered Entity’s negligence or willful misconduct.\n' +
+      '6.6 Entire Agreement. This Agreement, together with the underlying service agreement(s) between Covered Entity and Business Associate, constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior or contemporaneous agreements, proposals, and communications, whether oral or written, relating to such subject matter.\n' +
+      '6.7 Counterparts. This Agreement may be executed in counterparts, each of which shall be deemed an original and all of which together shall constitute one and the same instrument. Signatures provided by facsimile, electronic, or digital means shall be deemed to be original.',
+      { align: 'justify', lineGap: 3 }
     );
     doc.moveDown(2);
 
-    doc.font('Helvetica-Bold').text('IN WITNESS WHEREOF, the parties have executed this Master Business Associate Agreement electronically.');
+    // Digital Signatures
+    doc.font('Helvetica-Bold').text('IN WITNESS WHEREOF, the parties hereto have executed this Business Associate Agreement as of the Effective Date.');
     doc.moveDown(1.5);
 
-    doc.rect(50, doc.y, 512, 70).stroke('#cbd5e0');
-    doc.fontSize(9).fillColor('#1a2a47').font('Helvetica-Bold').text('ELECTRONIC ATTESTATION & DIGITAL RECORD', 65, doc.y + 10);
-    doc.font('Helvetica').fontSize(8).fillColor('#4a5568').text(`Executed For: ${clinic_name} | Representative: ${signer_name} (${signer_title})`, 65, doc.y + 4);
-    doc.text(`Timestamp: ${new Date().toLocaleString()} | DirectCare Compliance Verification Engine`, 65, doc.y + 4);
+    // Covered Entity Signatures
+    doc.rect(50, doc.y, 512, 100).stroke('#cbd5e0');
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('COVERED ENTITY (CLINIC/PRACTICE) ATTESTATION', 65, doc.y + 10);
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
+    doc.text(`Clinic/Entity Name: ${clinic_name}`, 65, doc.y + 6);
+    doc.text(`Authorized Signer: ${signer_name} (${signer_title})`, 65, doc.y + 4);
+    doc.text(`Address: ${address}`, 65, doc.y + 4);
+    doc.text(`Phone / Representative Email: ${phone} / ${auth_rep_email}`, 65, doc.y + 4);
+    doc.text(`Date of Execution: ${effectiveDate} (Electronically Verified)`, 65, doc.y + 4);
+    doc.moveDown(2);
+
+    // Business Associate Signatures
+    doc.rect(50, doc.y, 512, 80).stroke('#cbd5e0');
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('BUSINESS ASSOCIATE (DIRECTCARE PULMONARY DIAGNOSTICS LLC)', 65, doc.y + 10);
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
+    doc.text(`Authorized Signer: Robert Beaty, MHA, RRT-ACCS, RPFT`, 65, doc.y + 6);
+    doc.text(`Title: Managing Director`, 65, doc.y + 4);
+    doc.text(`Date of Execution: ${effectiveDate}`, 65, doc.y + 4);
 
     doc.end();
   } catch (err) {
