@@ -174,6 +174,71 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// CLINIC CREATION & EXECUTED BAA ENDPOINT
+app.post('/api/clinics', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  
+  const { 
+    clinic_name, 
+    billing_email, 
+    phone_number, 
+    authorized_rep_email, 
+    address, 
+    baa_signer_name, 
+    baa_signer_title, 
+    baa_signature 
+  } = req.body;
+
+  if (!clinic_name || !billing_email) {
+    return res.status(400).json({ error: 'Clinic name and billing email are required.' });
+  }
+
+  if (!baa_signer_name || !baa_signature) {
+    return res.status(400).json({ error: 'Organizational BAA signature and signer details are required for compliance.' });
+  }
+
+  try {
+    const query = `
+      INSERT INTO clinics (
+        clinic_name, 
+        billing_email, 
+        phone_number, 
+        authorized_rep_email, 
+        address, 
+        baa_signer_name, 
+        baa_signer_title, 
+        baa_signature, 
+        baa_signed_date
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+      ON CONFLICT (clinic_name) DO UPDATE SET 
+        billing_email = EXCLUDED.billing_email, 
+        phone_number = EXCLUDED.phone_number,
+        authorized_rep_email = EXCLUDED.authorized_rep_email,
+        address = EXCLUDED.address,
+        baa_signer_name = EXCLUDED.baa_signer_name,
+        baa_signer_title = EXCLUDED.baa_signer_title,
+        baa_signature = EXCLUDED.baa_signature,
+        baa_signed_date = CURRENT_TIMESTAMP
+      RETURNING *;
+    `;
+    const result = await pool.query(query, [
+      clinic_name, 
+      billing_email, 
+      phone_number || null, 
+      authorized_rep_email || null, 
+      address, 
+      baa_signer_name, 
+      baa_signer_title, 
+      baa_signature
+    ]);
+    res.status(201).json({ message: 'Clinic and executed BAA saved successfully', clinic: result.rows[0] });
+  } catch (err) {
+    console.error("Clinic BAA save error:", err);
+    res.status(500).json({ error: 'Failed to save clinic account: ' + err.message });
+  }
+});
+
 // RECORD DIGITAL BAA SIGNATURE & METADATA ENDPOINT
 app.post('/api/auth/sign-baa', verifyToken, async (req, res) => {
   try {
