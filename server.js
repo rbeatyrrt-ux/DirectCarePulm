@@ -465,7 +465,7 @@ app.post('/api/forgot-password', async (req, res) => {
     await pool.query('UPDATE users SET password_hash = $1, must_change_password = TRUE WHERE user_id = $2', [hashedPassword, user.user_id]);
     await pool.query('INSERT INTO password_history (user_id, password_hash) VALUES ($1, $2)', [user.user_id, hashedPassword]);
 
-    await sendTrackedEmail(
+    sendTrackedEmail(
       email,
       'Your Temporary Portal Password',
       `<p>Hello ${user.full_name},</p><p>A password reset was requested for your DirectCare PFT Portal account.</p><p>Your secure temporary password is: <strong>${tempPassword}</strong></p><p>Please log in using this temporary password.</p>`
@@ -583,7 +583,7 @@ app.get('/api/booked-slots', verifyToken, async (req, res) => {
 
 // NEW GET USERS ROUTE ADDED HERE
 app.get('/api/users', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  // Admin restriction removed so clinic nurses can fetch the provider list
   try {
     const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed, baa_signer_name, baa_signed_date, baa_ip_address FROM users ORDER BY full_name ASC');
     res.json(result.rows);
@@ -611,7 +611,7 @@ app.post('/api/users', verifyToken, async (req, res) => {
     await pool.query('INSERT INTO password_history (user_id, password_hash) VALUES ($1, $2)', [result.rows[0].user_id, hashedPassword]);
     
     // Send welcome email with temporary password
-    await sendTrackedEmail(
+    sendTrackedEmail(
       email,
       'Welcome to DirectCare PFT Portal - Your Account Details',
       `<p>Hello ${full_name},</p><p>An administrator has created your DirectCare PFT Portal account.</p><p>Your temporary password is: <strong>Password123!</strong></p><p>Please log in and update your password.</p>`
@@ -744,7 +744,7 @@ app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
 
     // Send notification email if provider email exists
     if (targetReq.provider_email) {
-      await sendTrackedEmail(
+      sendTrackedEmail(
         targetReq.provider_email,
         `Patient Order Scheduled - #${id} (${targetReq.patient_name})`,
         `<p>Hello Dr./Provider ${targetReq.provider_name || ''},</p><p>Your test order for patient <strong>${targetReq.patient_name}</strong> has been approved and scheduled for <strong>${new Date(targetReq.requested_date).toLocaleDateString()}</strong> (${targetReq.time_block.replace('_', ' - ')}).</p>`,
@@ -783,7 +783,7 @@ app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), a
     // Notify interpreting physicians
     const physQuery = await pool.query(`SELECT email, full_name FROM users WHERE role = 'physician'`);
     for (let phys of physQuery.rows) {
-      await sendTrackedEmail(
+      sendTrackedEmail(
         phys.email,
         `Preliminary PFT Results Ready for Overread - Order #${id}`,
         `<p>Hello Dr. ${phys.full_name},</p><p>Preliminary technical results and RRT notes have been uploaded for order #${id}. Please log in to complete your physician interpretation.</p>`,
@@ -851,7 +851,7 @@ app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
 
     if (orderData.rows.length > 0 && orderData.rows[0].provider_email) {
       const order = orderData.rows[0];
-      await sendTrackedEmail(
+      sendTrackedEmail(
         order.provider_email,
         `PFT Report Completed - Patient ${order.patient_name} (Order #${id})`,
         `<p>Hello Dr./Provider ${order.provider_name || ''},</p><p>The final physician-interpreted PFT report for patient <strong>${order.patient_name}</strong> is now completed and available for download in the portal.</p>`,
@@ -915,7 +915,7 @@ app.post('/api/requests', verifyToken, async (req, res) => {
     // Notify admins that a new order was created
     const adminQuery = await pool.query(`SELECT email FROM users WHERE role = 'admin'`);
     for (let admin of adminQuery.rows) {
-      await sendTrackedEmail(
+      sendTrackedEmail(
         admin.email,
         `New PFT Order Submitted - Patient ${patient_name}`,
         `<p>A new service request has been submitted for patient <strong>${patient_name}</strong> at <strong>${clinicName}</strong>.</p>`,
