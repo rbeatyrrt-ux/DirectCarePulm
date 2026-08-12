@@ -576,6 +576,17 @@ app.get('/api/booked-slots', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to fetch booked slots: ' + err.message }); }
 });
 
+// NEW GET USERS ROUTE ADDED HERE
+app.get('/api/users', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed, baa_signer_name, baa_signed_date, baa_ip_address FROM users ORDER BY full_name ASC');
+    res.json(result.rows);
+  } catch (err) { 
+    res.status(500).json({ error: 'Failed to fetch users' }); 
+  }
+});
+
 app.post('/api/users', verifyToken, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
   const { full_name, email, role, clinic_name, credentials, npi } = req.body;
