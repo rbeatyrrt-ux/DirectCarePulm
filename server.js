@@ -40,6 +40,34 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// ROBUST EMAIL SENDER WITH DATABASE LOGGING
+async function sendTrackedEmail(toEmail, subject, htmlContent, relatedRecordId = null) {
+  let status = 'SUCCESS';
+  let errorMessage = null;
+
+  try {
+    await transporter.sendMail({
+      from: `"DirectCare PFT Portal" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: subject,
+      html: htmlContent
+    });
+  } catch (err) {
+    status = 'FAILED';
+    errorMessage = err.message;
+    console.error(`Email delivery failed to ${toEmail}:`, err);
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO email_logs (recipient, subject, status, error_message, record_id) VALUES ($1, $2, $3, $4, $5)`,
+      [toEmail, subject, status, errorMessage, relatedRecordId]
+    );
+  } catch (logErr) {
+    console.error("Failed to write to email_logs table:", logErr);
+  }
+}
+
 async function initializeDatabase() {
   try {
     await pool.query(`
@@ -119,6 +147,16 @@ async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS email_logs (
+        log_id SERIAL PRIMARY KEY,
+        recipient VARCHAR(255),
+        subject VARCHAR(255),
+        status VARCHAR(50),
+        error_message TEXT,
+        record_id INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_dob DATE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed BOOLEAN DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
@@ -165,6 +203,7 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+// DIRECT LOGIN ENDPOINT (NO MFA)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -180,6 +219,8 @@ app.post('/api/login', async (req, res) => {
       JWT_SECRET, 
       { expiresIn: '8h' }
     );
+
+    await logAudit(user.user_id, 'USER_LOGIN_SUCCESS', null, req);
 
     res.json({
       message: 'Login successful',
@@ -416,12 +457,11 @@ app.post('/api/forgot-password', async (req, res) => {
     await pool.query('UPDATE users SET password_hash = $1, must_change_password = TRUE WHERE user_id = $2', [hashedPassword, user.user_id]);
     await pool.query('INSERT INTO password_history (user_id, password_hash) VALUES ($1, $2)', [user.user_id, hashedPassword]);
 
-    await transporter.sendMail({
-      from: `"DirectCare PFT Portal" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Your Temporary Portal Password',
-      html: `<p>Hello ${user.full_name},</p><p>A password reset was requested for your DirectCare PFT Portal account.</p><p>Your secure temporary password is: <strong>${tempPassword}</strong></p><p>Please log in using this temporary password. You will be prompted to choose a new secure password immediately upon logging in.</p>`
-    });
+    await sendTrackedEmail(
+      email,
+      'Your Temporary Portal Password',
+      `<p>Hello ${user.full_name},</p><p>A password reset was requested for your DirectCare PFT Portal account.</p><p>Your secure temporary password is: <strong>${tempPassword}</strong></p><p>Please log in using this temporary password.</p>`
+    );
 
     res.json({ message: 'If an account exists with that email, a temporary password has been sent.' });
   } catch (err) { res.status(500).json({ error: 'Failed to process password recovery request.' }); }
@@ -473,6 +513,29 @@ app.put('/api/auth/update-credentials', verifyToken, async (req, res) => {
     const updateResult = await pool.query(query, params);
     res.json({ message: 'Credentials updated successfully', user: updateResult.rows[0] });
   } catch (err) { res.status(500).json({ error: 'Failed to update credentials' }); }
+});
+
+app.get('/api/audit-logs', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    const result = await pool.query(`
+      SELECT al.*, u.full_name, u.role
+      FROM audit_logs al
+      LEFT JOIN users u ON al.user_id = u.user_id
+      ORDER BY al.created_at DESC
+      LIMIT 500
+    `);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch audit logs' }); }
+});
+
+// GET EMAIL DELIVERY LOGS
+app.get('/api/email-logs', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    const result = await pool.query(`SELECT * FROM email_logs ORDER BY created_at DESC LIMIT 500`);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch email logs' }); }
 });
 
 app.get('/api/clinic-schedules', verifyToken, async (req, res) => {
@@ -529,6 +592,14 @@ app.post('/api/users', verifyToken, async (req, res) => {
       `;
       const result = await pool.query(query, [full_name, email, hashedPassword, role || 'provider', assignedClinic, credentials, npi]);
       await pool.query('INSERT INTO password_history (user_id, password_hash) VALUES ($1, $2)', [result.rows[0].user_id, hashedPassword]);
+      
+      // Send welcome email with temporary password
+      await sendTrackedEmail(
+        email,
+        'Welcome to DirectCare PFT Portal - Your Account Details',
+        `<p>Hello ${full_name},</p><p>An administrator has created your DirectCare PFT Portal account.</p><p>Your temporary password is: <strong>Password123!</strong></p><p>Please log in and update your password.</p>`
+      );
+
       return res.status(201).json({ message: 'User created successfully!', user: result.rows[0] });
     }
     return res.status(400).json({ error: 'User with this email already exists.' });
@@ -599,21 +670,6 @@ app.get('/api/audit/requests', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to fetch audit records' }); }
 });
 
-// GET NEW SYSTEM AUDIT LOGS
-app.get('/api/audit-logs', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
-  try {
-    const result = await pool.query(`
-      SELECT al.*, u.full_name, u.role
-      FROM audit_logs al
-      LEFT JOIN users u ON al.user_id = u.user_id
-      ORDER BY al.created_at DESC
-      LIMIT 500
-    `);
-    res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: 'Failed to fetch audit logs' }); }
-});
-
 app.delete('/api/requests/:id', verifyToken, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
   
@@ -644,12 +700,19 @@ app.delete('/api/requests/:id', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to delete record: ' + err.message }); }
 });
 
+// APPROVE & SCHEDULE -> SENDS EMAIL NOTIFICATION
 app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
 
   try {
     const { id } = req.params;
-    let reqDataRes = await pool.query('SELECT * FROM service_requests WHERE request_id = $1', [id]);
+    let reqDataRes = await pool.query(`
+      SELECT sr.*, u.email as provider_email, u.full_name as provider_name 
+      FROM service_requests sr 
+      LEFT JOIN users u ON sr.provider_id = u.user_id 
+      WHERE sr.request_id = $1
+    `, [id]);
+    
     if (reqDataRes.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
 
     const targetReq = reqDataRes.rows[0];
@@ -663,10 +726,22 @@ app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
     }
 
     const query = await pool.query(`UPDATE service_requests SET status = 'SCHEDULED' WHERE request_id = $1 RETURNING *;`, [id]);
+
+    // Send notification email if provider email exists
+    if (targetReq.provider_email) {
+      await sendTrackedEmail(
+        targetReq.provider_email,
+        `Patient Order Scheduled - #${id} (${targetReq.patient_name})`,
+        `<p>Hello Dr./Provider ${targetReq.provider_name || ''},</p><p>Your test order for patient <strong>${targetReq.patient_name}</strong> has been approved and scheduled for <strong>${new Date(targetReq.requested_date).toLocaleDateString()}</strong> (${targetReq.time_block.replace('_', ' - ')}).</p>`,
+        id
+      );
+    }
+
     res.json({ message: 'Order approved and scheduled', request: query.rows[0] });
   } catch (err) { res.status(500).json({ error: 'Failed to update order status: ' + err.message }); }
 });
 
+// PRELIMINARY RESULTS UPLOAD -> SENDS NOTIFICATION
 app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -690,6 +765,17 @@ app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), a
     const result = await pool.query(query, params);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
 
+    // Notify interpreting physicians
+    const physQuery = await pool.query(`SELECT email, full_name FROM users WHERE role = 'physician'`);
+    for (let phys of physQuery.rows) {
+      await sendTrackedEmail(
+        phys.email,
+        `Preliminary PFT Results Ready for Overread - Order #${id}`,
+        `<p>Hello Dr. ${phys.full_name},</p><p>Preliminary technical results and RRT notes have been uploaded for order #${id}. Please log in to complete your physician interpretation.</p>`,
+        id
+      );
+    }
+
     res.json({ message: 'Preliminary results saved successfully', request: result.rows[0] });
   } catch (err) { res.status(500).json({ error: 'Failed to update preliminary results: ' + err.message }); }
 });
@@ -712,6 +798,7 @@ app.get('/api/requests/:id/raw-report', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to stream report PDF from S3: ' + err.message }); }
 });
 
+// FINALIZE REVIEW -> SENDS COMPLETION EMAIL
 app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
   const { id } = req.params;
   const { interpretation, signature_pin } = req.body;
@@ -738,6 +825,24 @@ app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
 
     await logAudit(req.user.user_id, 'FINALIZE_INTERPRETATION', id, req);
+
+    // Fetch provider/clinic email to notify them that the report is complete
+    const orderData = await pool.query(`
+      SELECT sr.*, u.email as provider_email, u.full_name as provider_name 
+      FROM service_requests sr 
+      LEFT JOIN users u ON sr.provider_id = u.user_id 
+      WHERE sr.request_id = $1
+    `, [id]);
+
+    if (orderData.rows.length > 0 && orderData.rows[0].provider_email) {
+      const order = orderData.rows[0];
+      await sendTrackedEmail(
+        order.provider_email,
+        `PFT Report Completed - Patient ${order.patient_name} (Order #${id})`,
+        `<p>Hello Dr./Provider ${order.provider_name || ''},</p><p>The final physician-interpreted PFT report for patient <strong>${order.patient_name}</strong> is now completed and available for download in the portal.</p>`,
+        id
+      );
+    }
 
     res.json({ message: 'Order successfully signed, updated, and completed.', request: result.rows[0] });
   } catch (err) { res.status(500).json({ error: 'Failed to finalize review: ' + err.message }); }
@@ -791,6 +896,17 @@ app.post('/api/requests', verifyToken, async (req, res) => {
     const result = await pool.query(query, [clinicName, patient_name, patient_dob || null, insurance_type, ordering_reason, tests_ordered, todayDate, time_block || null, initialStatus, assignedProviderId]);
     
     await logAudit(req.user.user_id, 'CREATE_PATIENT_ORDER', result.rows[0].request_id, req);
+
+    // Notify admins that a new order was created
+    const adminQuery = await pool.query(`SELECT email FROM users WHERE role = 'admin'`);
+    for (let admin of adminQuery.rows) {
+      await sendTrackedEmail(
+        admin.email,
+        `New PFT Order Submitted - Patient ${patient_name}`,
+        `<p>A new service request has been submitted for patient <strong>${patient_name}</strong> at <strong>${clinicName}</strong>.</p>`,
+        result.rows[0].request_id
+      );
+    }
 
     res.status(201).json({ message: 'Service request created successfully', request: result.rows[0] });
   } catch (err) { res.status(500).json({ error: 'Failed to submit service request: ' + err.message }); }
