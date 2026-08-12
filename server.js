@@ -85,10 +85,11 @@ async function initializeDatabase() {
         baa_signed_date TIMESTAMP
       );
 
+      -- Removed UNIQUE constraint on email to allow shared test addresses
       CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
         full_name VARCHAR(255),
-        email VARCHAR(255) UNIQUE,
+        email VARCHAR(255),
         password_hash VARCHAR(255),
         signature_pin_hash VARCHAR(255),
         role VARCHAR(50) DEFAULT 'admin',
@@ -203,11 +204,10 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-// DIRECT LOGIN ENDPOINT (NO MFA)
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 LIMIT 1', [email]);
     if (result.rows.length === 0) return res.status(400).json({ error: 'Invalid email or password' });
 
     const user = result.rows[0];
@@ -446,7 +446,7 @@ app.get('/api/clinics/:id/baa-pdf', verifyToken, async (req, res) => {
 app.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
   try {
-    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const userResult = await pool.query('SELECT * FROM users WHERE email = $1 LIMIT 1', [email]);
     if (userResult.rows.length === 0) return res.json({ message: 'If an account exists with that email, a temporary password has been sent.' });
 
     const user = userResult.rows[0];
@@ -573,37 +573,34 @@ app.get('/api/booked-slots', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to fetch booked slots: ' + err.message }); }
 });
 
+// REMOVED DUPLICATE EMAIL CHECK SO USERS CAN SHARE THE SAME EMAIL ADDRESS
 app.post('/api/users', verifyToken, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
   const { full_name, email, role, clinic_name, credentials, npi } = req.body;
 
   try {
-    const existing = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (existing.rows.length === 0) {
-      const defaultPassword = 'Password123!';
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(defaultPassword, salt);
+    const defaultPassword = 'Password123!';
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
-      const assignedClinic = ['admin', 'rrt', 'physician', 'billing'].includes(role) ? null : clinic_name;
-      const query = `
-        INSERT INTO users (full_name, email, password_hash, role, clinic_name, credentials, npi, must_change_password)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
-        RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed;
-      `;
-      const result = await pool.query(query, [full_name, email, hashedPassword, role || 'provider', assignedClinic, credentials, npi]);
-      await pool.query('INSERT INTO password_history (user_id, password_hash) VALUES ($1, $2)', [result.rows[0].user_id, hashedPassword]);
-      
-      // Send welcome email with temporary password
-      await sendTrackedEmail(
-        email,
-        'Welcome to DirectCare PFT Portal - Your Account Details',
-        `<p>Hello ${full_name},</p><p>An administrator has created your DirectCare PFT Portal account.</p><p>Your temporary password is: <strong>Password123!</strong></p><p>Please log in and update your password.</p>`
-      );
+    const assignedClinic = ['admin', 'rrt', 'physician', 'billing'].includes(role) ? null : clinic_name;
+    const query = `
+      INSERT INTO users (full_name, email, password_hash, role, clinic_name, credentials, npi, must_change_password)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
+      RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed;
+    `;
+    const result = await pool.query(query, [full_name, email, hashedPassword, role || 'provider', assignedClinic, credentials, npi]);
+    await pool.query('INSERT INTO password_history (user_id, password_hash) VALUES ($1, $2)', [result.rows[0].user_id, hashedPassword]);
+    
+    // Send welcome email with temporary password
+    await sendTrackedEmail(
+      email,
+      'Welcome to DirectCare PFT Portal - Your Account Details',
+      `<p>Hello ${full_name},</p><p>An administrator has created your DirectCare PFT Portal account.</p><p>Your temporary password is: <strong>Password123!</strong></p><p>Please log in and update your password.</p>`
+    );
 
-      return res.status(201).json({ message: 'User created successfully!', user: result.rows[0] });
-    }
-    return res.status(400).json({ error: 'User with this email already exists.' });
-  } catch (err) { res.status(500).json({ error: 'Failed to create user account' }); }
+    return res.status(201).json({ message: 'User created successfully!', user: result.rows[0] });
+  } catch (err) { res.status(500).json({ error: 'Failed to create user account: ' + err.message }); }
 });
 
 app.put('/api/users/:id', verifyToken, async (req, res) => {
@@ -1019,7 +1016,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.moveDown(1);
 
     doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('Final Physician Interpretation & Overread:');
-    doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
     doc.moveDown(2);
 
     doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
