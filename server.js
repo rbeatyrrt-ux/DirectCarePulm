@@ -210,7 +210,12 @@ const verifyToken = (req, res, next) => {
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1 LIMIT 1', [email]);
+    // FIX: Force the system to grab the 'admin' account first if duplicate emails exist
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email = $1 ORDER BY CASE WHEN role = 'admin' THEN 1 ELSE 2 END ASC LIMIT 1", 
+      [email]
+    );
+    
     if (result.rows.length === 0) return res.status(400).json({ error: 'Invalid email or password' });
 
     const user = result.rows[0];
