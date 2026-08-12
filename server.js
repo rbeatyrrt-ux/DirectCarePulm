@@ -85,7 +85,6 @@ async function initializeDatabase() {
         baa_signed_date TIMESTAMP
       );
 
-      -- Removed UNIQUE constraint on email to allow shared test addresses
       CREATE TABLE IF NOT EXISTS users (
         user_id SERIAL PRIMARY KEY,
         full_name VARCHAR(255),
@@ -102,6 +101,10 @@ async function initializeDatabase() {
         baa_signer_name VARCHAR(255),
         baa_ip_address VARCHAR(100)
       );
+
+      -- Drop unique email constraint if it was previously created on the live database
+      ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_key;
+      DROP INDEX IF EXISTS users_email_key;
 
       CREATE TABLE IF NOT EXISTS password_history (
         history_id SERIAL PRIMARY KEY,
@@ -573,7 +576,6 @@ app.get('/api/booked-slots', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to fetch booked slots: ' + err.message }); }
 });
 
-// REMOVED DUPLICATE EMAIL CHECK SO USERS CAN SHARE THE SAME EMAIL ADDRESS
 app.post('/api/users', verifyToken, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
   const { full_name, email, role, clinic_name, credentials, npi } = req.body;
@@ -1016,7 +1018,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.moveDown(1);
 
     doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('Final Physician Interpretation & Overread:');
-    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
+    doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
     doc.moveDown(2);
 
     doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
