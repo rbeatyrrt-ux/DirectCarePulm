@@ -3,18 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Guidance for Providers | DirectCare Pulmonary Diagnostics</title>
+    <title>For Providers | DirectCare Pulmonary Diagnostics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .blend-logo { mix-blend-mode: multiply; }
-        /* Styling for the interactive trajectory timeline */
-        .timeline-step {
-            transition: all 0.3s ease;
-        }
-        .timeline-step:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
@@ -45,7 +37,7 @@
             <!-- MIDDLE: NAVIGATION LINKS -->
             <nav class="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-700">
                 <a href="/" class="hover:text-[#208882] transition pb-1">Home</a>
-                <a href="technology.html" class="hover:text-[#208882] transition pb-1">Technology (EasyOne Pro Lab)</a>
+                <a href="technology.html" class="hover:text-[#208882] transition pb-1">Technology (EasyOne Pro LAB)</a>
                 <a href="practices.html" class="hover:text-[#208882] transition pb-1">For Practices & Pricing</a>
                 <a href="provider.html" class="hover:text-[#208882] transition pb-1 text-[#208882]">For Providers</a>
                 <a href="protocols.html" class="hover:text-[#208882] transition pb-1">Clinical Guidelines</a>
@@ -73,7 +65,7 @@
             <a href="technology.html" class="hover:text-[#208882]">Technology</a>
             <a href="practices.html" class="hover:text-[#208882]">Practices</a>
             <a href="provider.html" class="hover:text-[#208882] text-[#208882]">Providers</a>
-            <a href="protocols.html" class="hover:text-[#208882]">Protocols</a>
+            <a href="protocols.html" class="hover:text-[#208882]">Guidelines</a>
             <a href="osha.html" class="hover:text-[#208882]">OSHA</a>
         </div>
     </header>
@@ -81,299 +73,105 @@
     <!-- PAGE HERO -->
     <section class="bg-gradient-to-br from-[#0f223d] via-[#1A365D] to-[#0f223d] text-white py-20 px-6 text-center">
         <span class="bg-[#208882]/30 text-teal-300 border border-[#208882]/50 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-4">
-            Physician & Provider Resource
+            Join the Tele-Pulmonology Network
         </span>
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-            Clinical Guidelines & <span class="text-[#319795]">Interpretation Standards</span>
+            Flexible, Frictionless <span class="text-[#319795]">Diagnostic Overreads</span>
         </h1>
         <p class="text-slate-300 max-w-3xl mx-auto text-base md:text-lg leading-relaxed">
-            Essential reference data for primary care providers detailing testing indications, clinical outcomes, reporting workflows, and international diagnostic standards.
+            Generate supplementary income by providing asynchronous diagnostic interpretations for rural clinics, backed by our corporate malpractice rider and pristine ATS/ERS-compliant data.
         </p>
     </section>
 
     <!-- MAIN CONTENT -->
     <main class="py-16 px-6 max-w-5xl mx-auto space-y-16">
 
-        <!-- NEW SECTION: EMOTION & FINANCIAL MISSION -->
-        <div class="bg-gradient-to-r from-[#0f223d] to-slate-900 text-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-800 relative overflow-hidden">
-            <!-- Decorative Accent -->
-            <div class="absolute -top-10 -right-10 opacity-10">
-                <svg width="250" height="250" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        <!-- THE PITCH -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+                <span class="text-[#208882] font-bold text-xs uppercase tracking-widest">Why DirectCare?</span>
+                <h2 class="text-3xl font-extrabold text-slate-900 mt-2 mb-4">High-Quality Data. Zero Admin Headaches.</h2>
+                <p class="text-slate-600 text-sm md:text-base leading-relaxed mb-4">
+                    The biggest frustration for pulmonologists doing remote overreads is poor data quality from untrained medical assistants, and the hassle of navigating multiple clunky hospital EMRs.
+                </p>
+                <p class="text-slate-600 text-sm md:text-base leading-relaxed font-medium border-l-4 border-[#208882] pl-4">
+                    DirectCare eliminates both. Every test is personally executed by a Board-Certified Respiratory Therapist (RRT) using the ndd EasyOne Pro LAB (ultrasonic TrueFlow). You review perfect, artifact-free flow-volume loops in a single, unified AWS portal.
+                </p>
             </div>
             
-            <div class="relative z-10 text-center max-w-3xl mx-auto mb-10">
-                <span class="text-teal-400 font-bold text-xs uppercase tracking-widest">Mission & Margins</span>
-                <h2 class="text-3xl md:text-4xl font-extrabold mt-2 mb-4">Doing the Right Thing Shouldn't Cost You.</h2>
-                <p class="text-slate-300 text-base leading-relaxed">
-                    As an independent primary care provider, you fight every day to keep your patients healthy and your practice doors open. Sending your most vulnerable patients to a massive hospital network for a 20-minute breathing test hurts them physically, and it bleeds your practice financially. It is time to rethink the referral.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                <!-- Patient Emotion Side -->
-                <div class="bg-slate-800/60 p-6 md:p-8 rounded-2xl border border-slate-700">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-rose-500/20 p-2 rounded-lg text-rose-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white">The Right Thing for Them</h3>
-                    </div>
-                    <p class="text-sm text-slate-300 leading-relaxed">
-                        Your elderly and COPD patients trust <em>you</em>. Forcing someone who is already struggling to breathe to drive 45 minutes down rural highways to an unfamiliar, crowded hospital lab is exhausting and intimidating. By bringing the test to the exam room they already know, you eliminate their anxiety, guarantee they get tested, and provide immediate, compassionate care.
-                    </p>
-                </div>
+            <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <h3 class="font-bold text-[#0f223d] text-lg border-b border-slate-100 pb-2">Contractor Benefits</h3>
                 
-                <!-- Financial Practice Side -->
-                <div class="bg-slate-800/60 p-6 md:p-8 rounded-2xl border border-slate-700">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white">The Right Thing for Your Business</h3>
+                <div class="flex items-start gap-4">
+                    <div class="bg-teal-50 p-2 rounded-lg text-[#208882] flex-shrink-0 mt-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <p class="text-sm text-slate-300 leading-relaxed">
-                        Every time a patient leaves your office for a hospital PFT, you surrender the global diagnostic billing and risk losing the patient entirely to the specialist's network. DirectCare allows you to recapture that lost ancillary revenue—averaging $85 to $110 in net margin per test—putting that money back into your independent clinic where it belongs, so you can continue serving the community.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- CLINICAL OUTCOMES & MORBIDITY -->
-        <div class="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm">
-            <div class="text-center max-w-2xl mx-auto mb-10">
-                <span class="text-rose-600 font-bold text-xs uppercase tracking-widest">The Cost of Delayed Care</span>
-                <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Morbidity & Mortality Impact</h2>
-                <p class="text-slate-600 text-sm mt-3">Why securing diagnostic data at the primary care level is a critical life-saving intervention.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Left: The Problem -->
-                <div class="bg-rose-50 p-6 rounded-2xl border border-rose-100">
-                    <h3 class="font-bold text-rose-900 text-lg mb-3 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                        Risks of Undiagnosed Obstruction
-                    </h3>
-                    <ul class="space-y-3 text-sm text-slate-700">
-                        <li><strong>Underdiagnosis:</strong> Up to 50% of patients with functionally significant COPD remain undiagnosed until severe exacerbations force emergency room visits.</li>
-                        <li><strong>Mortality Spike:</strong> Patients hospitalized for severe COPD exacerbations face a 1-year mortality rate exceeding 20%.</li>
-                        <li><strong>Blind Prescribing:</strong> Empiric prescribing of inhaled corticosteroids (ICS) without objective PFT confirmation increases pneumonia risks in non-asthmatic patients.</li>
-                    </ul>
-                </div>
-                <!-- Right: The Solution -->
-                <div class="bg-teal-50 p-6 rounded-2xl border border-teal-100">
-                    <h3 class="font-bold text-teal-900 text-lg mb-3 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                        Impact of Proactive Monitoring
-                    </h3>
-                    <ul class="space-y-3 text-sm text-slate-700">
-                        <li><strong>Hospitalization Reduction:</strong> Annual spirometric monitoring linked to targeted LABA/LAMA therapy reduces acute exacerbation frequency by up to 25%.</li>
-                        <li><strong>Lung Function Preservation:</strong> Early intervention limits the rapid decline of FEV1 characteristic of early-stage COPD.</li>
-                        <li><strong>Medication Optimization:</strong> Objective reversibility testing ensures patients are receiving the correct therapeutic phenotype protocol.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- FUN ELEMENT: PATIENT TRAJECTORY TIMELINE -->
-        <div class="bg-[#0f223d] text-white p-8 md:p-12 rounded-3xl shadow-xl border border-blue-900">
-            <div class="text-center mb-8">
-                <span class="text-teal-400 font-bold text-xs uppercase tracking-widest">Interactive Visualization</span>
-                <h2 class="text-2xl font-extrabold mt-2 mb-4">The 12-Month Patient Trajectory</h2>
-                
-                <!-- COMPLIANCE CONTRAST BLOCK -->
-                <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-700 max-w-3xl mx-auto mb-8">
-                    <h3 class="text-sm font-semibold text-slate-300 mb-4">The Compliance Advantage: In-House vs. External Referral</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                        <div class="bg-rose-900/40 border border-rose-800 rounded-xl p-4 text-center">
-                            <div class="text-3xl font-extrabold text-rose-400 mb-1">45–50%</div>
-                            <div class="text-[10px] font-bold text-rose-200 uppercase tracking-wide">External Referral<br>No-Show Rate</div>
-                        </div>
-                        <div class="flex justify-center text-slate-500">
-                            <svg class="w-6 h-6 sm:rotate-0 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        </div>
-                        <div class="bg-teal-900/40 border border-teal-800 rounded-xl p-4 text-center">
-                            <div class="text-3xl font-extrabold text-teal-400 mb-1">10–15%</div>
-                            <div class="text-[10px] font-bold text-teal-200 uppercase tracking-wide">In-Office Clinic<br>No-Show Rate</div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-4">Testing patients in their familiar medical home radically reduces diagnostic abandonment.</p>
-                </div>
-            </div>
-
-            <!-- Trajectory Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 relative">
-                <!-- Divider line (hidden on mobile) -->
-                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-700"></div>
-
-                <!-- Column 1: Hospital Referral Model -->
-                <div class="space-y-6">
-                    <h3 class="text-center text-rose-400 font-bold uppercase tracking-wider text-sm mb-6 border-b border-slate-700 pb-2">The Out-of-Town Referral</h3>
-                    
-                    <div class="timeline-step bg-slate-800 p-4 rounded-xl border border-slate-700 relative">
-                        <div class="absolute -left-3 -top-3 bg-slate-700 text-xs font-bold px-2 py-1 rounded-full text-slate-300">Month 1</div>
-                        <p class="text-sm text-slate-300 mt-2">Patient prescribed empiric inhaler and referred to hospital lab 45 minutes away.</p>
-                    </div>
-                    
-                    <div class="timeline-step bg-slate-800 p-4 rounded-xl border border-rose-900/50 relative">
-                        <div class="absolute -left-3 -top-3 bg-slate-700 text-xs font-bold px-2 py-1 rounded-full text-slate-300">Month 3</div>
-                        <p class="text-sm text-rose-300 mt-2">Patient abandons referral due to travel friction. Remains unmonitored on empiric therapy.</p>
-                    </div>
-
-                    <div class="timeline-step bg-rose-900/30 p-4 rounded-xl border border-rose-800 relative">
-                        <div class="absolute -left-3 -top-3 bg-rose-800 text-xs font-bold px-2 py-1 rounded-full text-rose-200">Month 12</div>
-                        <p class="text-sm text-rose-200 mt-2 font-medium">Patient suffers acute exacerbation. ER admission. Permanent loss of FEV1 capacity.</p>
-                    </div>
-                </div>
-
-                <!-- Column 2: DirectCare Mobile Model -->
-                <div class="space-y-6">
-                    <h3 class="text-center text-teal-400 font-bold uppercase tracking-wider text-sm mb-6 border-b border-slate-700 pb-2">The DirectCare Model</h3>
-                    
-                    <div class="timeline-step bg-slate-800 p-4 rounded-xl border border-slate-700 relative">
-                        <div class="absolute -left-3 -top-3 bg-[#208882] text-xs font-bold px-2 py-1 rounded-full text-white">Month 1</div>
-                        <p class="text-sm text-slate-300 mt-2">Patient tested inside your clinic. Receives Inhaler Tech Education (CPT 94664).</p>
-                    </div>
-                    
-                    <div class="timeline-step bg-slate-800 p-4 rounded-xl border border-teal-900/50 relative">
-                        <div class="absolute -left-3 -top-3 bg-[#208882] text-xs font-bold px-2 py-1 rounded-full text-white">Month 3</div>
-                        <p class="text-sm text-teal-300 mt-2">Pulmonologist report confirms COPD. Targeted LAMA therapy initiated immediately.</p>
-                    </div>
-
-                    <div class="timeline-step bg-teal-900/30 p-4 rounded-xl border border-teal-700 relative">
-                        <div class="absolute -left-3 -top-3 bg-teal-600 text-xs font-bold px-2 py-1 rounded-full text-white">Month 12</div>
-                        <p class="text-sm text-teal-100 mt-2 font-medium">Follow-up annual PFT completed locally. Disease progression stabilized. Zero hospital visits.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- THE SPECIALIST REFERRAL TRAP -->
-        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-8 md:p-12 rounded-3xl shadow-sm flex flex-col md:flex-row items-center gap-8">
-            <div class="md:w-1/3 flex justify-center">
-                <div class="bg-white p-6 rounded-full shadow-md border border-amber-100 relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-amber-600 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-            </div>
-            <div class="md:w-2/3">
-                <span class="text-amber-700 font-bold text-xs uppercase tracking-widest">Retaining Clinical Control</span>
-                <h2 class="text-3xl font-extrabold text-slate-900 mt-2 mb-4">The Specialist Referral Trap</h2>
-                <p class="text-slate-700 text-sm md:text-base leading-relaxed mb-4">
-                    When primary care providers refer patients to outside pulmonary specialists solely to obtain diagnostic testing, they risk permanent network leakage. 
-                </p>
-                <ul class="space-y-3 text-sm text-slate-700 font-medium">
-                    <li class="flex items-start gap-2">
-                        <span class="text-amber-500 font-bold">&#8226;</span>
-                        <span><strong>3 to 6 Month Delays:</strong> Waitlists for specialist intake appointments leave patients unmanaged and vulnerable.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-amber-500 font-bold">&#8226;</span>
-                        <span><strong>Patient Network Leakage:</strong> The patient is frequently absorbed into the specialist's hospital network for ongoing chronic care.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-amber-500 font-bold">&#8226;</span>
-                        <span><strong>Loss of Ancillary Revenue:</strong> The primary care practice permanently loses the global billing revenue for testing and follow-up Evaluation & Management (E/M) visits.</span>
-                    </li>
-                </ul>
-                <p class="text-slate-800 text-sm md:text-base leading-relaxed mt-4 font-bold border-l-4 border-amber-400 pl-4">
-                    DirectCare brings the specialist's diagnostic tools *and* their interpretive overread directly to your EMR—allowing you to retain 100% management of your patient.
-                </p>
-            </div>
-        </div>
-
-        <!-- SECTION 1: WHO TO TEST & FREQUENCY -->
-        <div class="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-            <span class="text-[#208882] font-bold text-xs uppercase tracking-widest">Patient Selection</span>
-            <h2 class="text-3xl font-extrabold text-slate-900">Testing Indications & Frequency</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                    <h3 class="font-bold text-slate-900 text-lg mb-3">Indications for Testing</h3>
-                    <ul class="space-y-2 text-sm text-slate-700">
-                        <li>&#8226; Chronic cough, sputum production, or progressive dyspnea.</li>
-                        <li>&#8226; History of heavy occupational, environmental, or tobacco smoke exposure.</li>
-                        <li>&#8226; Evaluation of chronic obstructive pulmonary disease (COPD) or asthma phenotypes.</li>
-                        <li>&#8226; Pre-operative pulmonary risk assessment for cardiothoracic or upper abdominal surgeries.</li>
-                    </ul>
-                </div>
-                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                    <h3 class="font-bold text-slate-900 text-lg mb-3">Testing Frequency</h3>
-                    <ul class="space-y-2 text-sm text-slate-700">
-                        <li>&#8226; <strong>Baseline:</strong> Initial diagnostic evaluation when respiratory symptoms present.</li>
-                        <li>&#8226; <strong>Annual Monitoring:</strong> Essential for tracking disease progression or therapeutic response in stable patients.</li>
-                        <li>&#8226; <strong>Post-Exacerbation / High Risk:</strong> Multi-interval testing per year may be required for highly unstable patients or rapid decliners to establish new personal baselines.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECTION 2: REPORTING & OVERREAD WORKFLOW -->
-        <div class="bg-slate-100 border border-slate-200 p-8 md:p-12 rounded-3xl shadow-sm space-y-6">
-            <span class="text-teal-700 font-bold text-xs uppercase tracking-widest">Turnaround & Quality Assurance</span>
-            <h2 class="text-3xl font-extrabold text-slate-900">Report Interpretation Workflow</h2>
-            <p class="text-slate-600 text-sm md:text-base leading-relaxed">
-                Every completed PFT suite includes expert clinical interpretation structured to guide actionable patient management plans. 
-            </p>
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                <div class="flex items-start space-x-4">
-                    <div class="bg-slate-700 text-white font-bold px-3 py-1 rounded-lg text-sm">RRT</div>
                     <div>
-                        <h4 class="font-bold text-slate-800">Preliminary RRT Read</h4>
-                        <p class="text-xs text-slate-600 mt-1">Performed immediately on-site by our Supervisory Respiratory Therapist to guarantee technical quality, acceptable waveforms, and ATS criteria compliance.</p>
+                        <h4 class="font-bold text-slate-800 text-sm">Competitive Per-Read Compensation</h4>
+                        <p class="text-xs text-slate-600 mt-1">Earn $30 for full PFT suites (Spiro, DLCO, Volumes) and $15 for standalone spirometry. Automated month-end settlements—no invoicing required.</p>
                     </div>
                 </div>
-                <hr class="border-slate-100">
-                <div class="flex items-start space-x-4">
-                    <div class="bg-[#208882] text-white font-bold px-3 py-1 rounded-lg text-sm">MD</div>
+
+                <div class="flex items-start gap-4">
+                    <div class="bg-teal-50 p-2 rounded-lg text-[#208882] flex-shrink-0 mt-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
                     <div>
-                        <h4 class="font-bold text-slate-800">Pulmonologist Final Read (24 – 48 Hours)</h4>
-                        <p class="text-xs text-slate-600 mt-1">A comprehensive diagnostic report with specialist interpretation and targeted management recommendations is securely delivered to your EMR within 24 to 48 hours.</p>
+                        <h4 class="font-bold text-slate-800 text-sm">Malpractice Rider Included</h4>
+                        <p class="text-xs text-slate-600 mt-1">You do not need to amend your primary malpractice policy. Our Corporate Professional Liability policy includes a secondary 1099 rider covering your remote interpretations.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                    <div class="bg-teal-50 p-2 rounded-lg text-[#208882] flex-shrink-0 mt-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">Asynchronous Freedom</h4>
+                        <p class="text-xs text-slate-600 mt-1">Log into the portal when you have downtime. You have a generous 24 to 48-hour window to complete your interpretations.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 3: GOLD & GINA STANDARDS -->
-        <div class="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm space-y-8">
-            <div class="text-center max-w-2xl mx-auto">
-                <span class="text-[#208882] font-bold text-xs uppercase tracking-widest">Global Evidence-Based Frameworks</span>
-                <h2 class="text-3xl font-extrabold text-slate-900 mt-2">GOLD & GINA Diagnostic Standards</h2>
-                <p class="text-slate-600 text-sm mt-2">Referencing international consensus guidelines for obstructive lung disease staging and control.</p>
+        <!-- HOW THE TECH WORKS -->
+        <div class="bg-[#0f223d] rounded-3xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
+            <!-- Decorative Accent -->
+            <div class="absolute -top-10 -right-10 opacity-10">
+                <svg width="250" height="250" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- GOLD -->
-                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-slate-900">GOLD Standards (COPD)</h3>
-                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded">COPD</span>
-                    </div>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        Defines post-bronchodilator fixed ratio FEV<sub>1</sub> / FVC &lt; 0.70 as persistent airflow limitation. Severity grading utilizes predicted FEV<sub>1</sub> percentages:
-                    </p>
-                    <ul class="space-y-2 text-xs text-slate-700">
-                        <li>&#8226; <strong>GOLD 1 (Mild):</strong> FEV<sub>1</sub> &ge; 80% predicted</li>
-                        <li>&#8226; <strong>GOLD 2 (Moderate):</strong> 50% &le; FEV<sub>1</sub> &lt; 80% predicted</li>
-                        <li>&#8226; <strong>GOLD 3 (Severe):</strong> 30% &le; FEV<sub>1</sub> &lt; 50% predicted</li>
-                        <li>&#8226; <strong>GOLD 4 (Very Severe):</strong> FEV<sub>1</sub> &lt; 30% predicted</li>
-                    </ul>
+            
+            <div class="relative z-10 text-center mb-10">
+                <span class="text-teal-400 font-bold text-xs uppercase tracking-widest">Frictionless Technology</span>
+                <h2 class="text-3xl font-extrabold mt-2">The AWS Portal Workflow</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                <div class="bg-slate-800/80 p-6 rounded-2xl border border-slate-700 text-center">
+                    <div class="bg-slate-700 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-400 font-bold text-xl">1</div>
+                    <h3 class="font-bold text-lg mb-2">Notification</h3>
+                    <p class="text-sm text-slate-400">Receive a secure HIPAA-compliant email/SMS alert when a new batch of testing is uploaded from the field.</p>
                 </div>
-
-                <!-- GINA -->
-                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-slate-900">GINA Standards (Asthma)</h3>
-                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">Asthma</span>
-                    </div>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        Emphasizes documented expiratory airflow limitation and significant bronchodilator reversibility:
-                    </p>
-                    <ul class="space-y-2 text-xs text-slate-700">
-                        <li>&#8226; <strong>Reversibility Positive:</strong> An increase in FEV<sub>1</sub> or FVC by &gt; 12% and &gt; 200 mL from baseline 10–15 minutes post-bronchodilator administration.</li>
-                        <li>&#8226; <strong>Variability Assessment:</strong> Monitoring excessive daily peak expiratory flow (PEF) fluctuations to confirm bronchial hyperresponsiveness.</li>
-                    </ul>
+                <div class="bg-slate-800/80 p-6 rounded-2xl border border-slate-700 text-center">
+                    <div class="bg-slate-700 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-400 font-bold text-xl">2</div>
+                    <h3 class="font-bold text-lg mb-2">Secure Login</h3>
+                    <p class="text-sm text-slate-400">Log into our unified web dashboard (AWS S3, 256-bit AES encrypted) using Multi-Factor Authentication.</p>
+                </div>
+                <div class="bg-slate-800/80 p-6 rounded-2xl border border-slate-700 text-center">
+                    <div class="bg-slate-700 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-400 font-bold text-xl">3</div>
+                    <h3 class="font-bold text-lg mb-2">Sign & Send</h3>
+                    <p class="text-sm text-slate-400">Review the PDF, type your impression, and input your digital PIN. The system automatically routes it back to the host clinic's EMR.</p>
                 </div>
             </div>
+        </div>
+
+        <!-- CALL TO ACTION -->
+        <div class="bg-white border border-slate-200 p-8 rounded-3xl text-center shadow-sm max-w-2xl mx-auto">
+            <h3 class="text-2xl font-extrabold text-slate-900 mb-3">Currently Recruiting Board-Certified Pulmonologists</h3>
+            <p class="text-slate-600 text-sm mb-6">If you hold an active, unrestricted medical license in the State of Ohio, contact us to review our 1099 Independent Contractor Agreement and BAA.</p>
+            <a href="mailto:robert.beaty@directcarepulm.com" class="inline-block bg-[#0f223d] hover:bg-slate-800 text-white font-bold px-8 py-3.5 rounded-xl transition shadow text-sm">
+                Email the Founder
+            </a>
         </div>
 
     </main>
@@ -390,7 +188,7 @@
                 <a href="index.html" class="hover:text-[#208882] transition">Home</a>
                 <a href="about.html" class="hover:text-[#208882] transition">About</a>
                 <a href="contact.html" class="hover:text-[#208882] transition">Contact</a>
-                </div>
+            </div>
             <div class="text-xs text-slate-500 text-center md:text-right">&copy; 2026 DirectCare. SDVOSB Certified.</div>
         </div>
     </footer>
