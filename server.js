@@ -95,7 +95,7 @@ async function initializeDatabase() {
         clinic_name VARCHAR(255),
         credentials VARCHAR(100),
         npi VARCHAR(20),
-        must_change_password BOOLEAN DEFAULT FALSE,
+        must_change_password BOOLEAN DEFAULT TRUE,
         baa_signed BOOLEAN DEFAULT FALSE,
         baa_signed_date TIMESTAMP,
         baa_signer_name VARCHAR(255),
@@ -166,6 +166,7 @@ async function initializeDatabase() {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signer_name VARCHAR(255);
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_ip_address VARCHAR(100);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN DEFAULT TRUE;
       
       ALTER TABLE clinics ADD COLUMN IF NOT EXISTS phone_number VARCHAR(50);
       ALTER TABLE clinics ADD COLUMN IF NOT EXISTS authorized_rep_email VARCHAR(255);
@@ -210,7 +211,6 @@ const verifyToken = (req, res, next) => {
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    // FIX: Force the system to grab the 'admin' account first if duplicate emails exist
     const result = await pool.query(
       "SELECT * FROM users WHERE email = $1 ORDER BY CASE WHEN role = 'admin' THEN 1 ELSE 2 END ASC LIMIT 1", 
       [email]
@@ -480,7 +480,7 @@ app.get('/api/auth/me', verifyToken, async (req, res) => {
     const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, must_change_password, baa_signed FROM users WHERE user_id = $1', [req.user.user_id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json(result.rows[0]);
-  } catch (err) { res.status(500).json({ error: 'Failed to fetch profile status' }); }
+  } catch (err) { res.status(500).json({ error: 'Failed to profile status' }); }
 });
 
 app.put('/api/auth/update-credentials', verifyToken, async (req, res) => {
@@ -581,9 +581,8 @@ app.get('/api/booked-slots', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to fetch booked slots: ' + err.message }); }
 });
 
-// NEW GET USERS ROUTE ADDED HERE
+// GET USERS ROUTE (OPEN TO CLINIC STAFF SO PROVIDER DROPDOWN POOL POPULATES)
 app.get('/api/users', verifyToken, async (req, res) => {
-  // Admin restriction removed so clinic nurses can fetch the provider list
   try {
     const result = await pool.query('SELECT user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed, baa_signer_name, baa_signed_date, baa_ip_address FROM users ORDER BY full_name ASC');
     res.json(result.rows);
@@ -605,7 +604,7 @@ app.post('/api/users', verifyToken, async (req, res) => {
     const query = `
       INSERT INTO users (full_name, email, password_hash, role, clinic_name, credentials, npi, must_change_password)
       VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
-      RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed;
+      RETURNING user_id, full_name, email, role, clinic_name, credentials, npi, baa_signed, must_change_password;
     `;
     const result = await pool.query(query, [full_name, email, hashedPassword, role || 'provider', assignedClinic, credentials, npi]);
     await pool.query('INSERT INTO password_history (user_id, password_hash) VALUES ($1, $2)', [result.rows[0].user_id, hashedPassword]);
