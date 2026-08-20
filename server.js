@@ -207,7 +207,15 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
-
+// TEMPORARY ROUTE TO ADD SIGNATURE COLUMN
+app.get('/api/add-signature-column', async (req, res) => {
+  try {
+    await pool.query(`ALTER TABLE service_requests ADD COLUMN patient_signature TEXT;`);
+    res.send('Signature column added successfully! You can delete this route.');
+  } catch (err) {
+    res.send('Error or already updated: ' + err.message);
+  }
+});
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
