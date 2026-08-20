@@ -6,12 +6,15 @@ const jwt = require('jsonwebtoken');
 const PDFDocument = require('pdfkit');
 const multer = require('multer');
 const path = require('path');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); 
+
+// Initialize Resend Client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Initialize AWS S3 Client
 const s3Client = new S3Client({ 
@@ -30,25 +33,15 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.EMAIL_PORT || 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-// ROBUST EMAIL SENDER WITH DATABASE LOGGING
+// ROBUST RESEND EMAIL SENDER WITH DATABASE LOGGING
 async function sendTrackedEmail(toEmail, subject, htmlContent, relatedRecordId = null) {
   let status = 'SUCCESS';
   let errorMessage = null;
 
   try {
-    await transporter.sendMail({
-      from: `"DirectCare PFT Portal" <${process.env.EMAIL_USER}>`,
-      to: toEmail,
+    await resend.emails.send({
+      from: 'DirectCare Portal <onboarding@resend.dev>',
+      to: [toEmail],
       subject: subject,
       html: htmlContent
     });
@@ -162,6 +155,11 @@ async function initializeDatabase() {
       );
 
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_dob DATE;
+      ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS consent_to_treat BOOLEAN DEFAULT FALSE;
+      ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS hipaa_notice_received BOOLEAN DEFAULT FALSE;
+      ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS telehealth_consent BOOLEAN DEFAULT FALSE;
+      ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_signature TEXT;
+
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed BOOLEAN DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signer_name VARCHAR(255);
@@ -207,13 +205,13 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+
 // SAVE PATIENT CONSENT & SIGNATURE
 app.put('/api/requests/:id/consent', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { signature } = req.body;
     
-    // This flips the three legal checkboxes to TRUE and saves the drawn signature
     const query = `
       UPDATE service_requests 
       SET consent_to_treat = TRUE, 
@@ -764,7 +762,6 @@ app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
 
     const query = await pool.query(`UPDATE service_requests SET status = 'SCHEDULED' WHERE request_id = $1 RETURNING *;`, [id]);
 
-    // Send notification email if provider email exists
     if (targetReq.provider_email) {
       sendTrackedEmail(
         targetReq.provider_email,
@@ -802,7 +799,6 @@ app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), a
     const result = await pool.query(query, params);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
 
-    // Notify interpreting physicians
     const physQuery = await pool.query(`SELECT email, full_name FROM users WHERE role = 'physician'`);
     for (let phys of physQuery.rows) {
       sendTrackedEmail(
@@ -863,7 +859,6 @@ app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
 
     await logAudit(req.user.user_id, 'FINALIZE_INTERPRETATION', id, req);
 
-    // Fetch provider/clinic email to notify them that the report is complete
     const orderData = await pool.query(`
       SELECT sr.*, u.email as provider_email, u.full_name as provider_name 
       FROM service_requests sr 
@@ -934,7 +929,6 @@ app.post('/api/requests', verifyToken, async (req, res) => {
     
     await logAudit(req.user.user_id, 'CREATE_PATIENT_ORDER', result.rows[0].request_id, req);
 
-    // Notify admins that a new order was created
     const adminQuery = await pool.query(`SELECT email FROM users WHERE role = 'admin'`);
     for (let admin of adminQuery.rows) {
       sendTrackedEmail(
@@ -964,7 +958,6 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     if (reqResult.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
     const reqData = reqResult.rows[0];
 
-    // Write audit log
     await logAudit(req.user.user_id, 'DOWNLOAD_FINAL_CLINICAL_REPORT', id, req);
 
     const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
