@@ -230,15 +230,7 @@ app.put('/api/requests/:id/consent', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to save consent: ' + err.message }); 
   }
 });
-// TEMPORARY ROUTE TO ADD SIGNATURE COLUMN
-app.get('/api/add-signature-column', async (req, res) => {
-  try {
-    await pool.query(`ALTER TABLE service_requests ADD COLUMN patient_signature TEXT;`);
-    res.send('Signature column added successfully! You can delete this route.');
-  } catch (err) {
-    res.send('Error or already updated: ' + err.message);
-  }
-});
+
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
