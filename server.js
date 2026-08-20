@@ -207,6 +207,29 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+// SAVE PATIENT CONSENT & SIGNATURE
+app.put('/api/requests/:id/consent', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { signature } = req.body;
+    
+    // This flips the three legal checkboxes to TRUE and saves the drawn signature
+    const query = `
+      UPDATE service_requests 
+      SET consent_to_treat = TRUE, 
+          hipaa_notice_received = TRUE, 
+          telehealth_consent = TRUE, 
+          patient_signature = $1 
+      WHERE request_id = $2 RETURNING *;
+    `;
+    const result = await pool.query(query, [signature, id]);
+    
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
+    res.json({ message: 'Consent saved successfully', request: result.rows[0] });
+  } catch (err) { 
+    res.status(500).json({ error: 'Failed to save consent: ' + err.message }); 
+  }
+});
 // TEMPORARY ROUTE TO ADD SIGNATURE COLUMN
 app.get('/api/add-signature-column', async (req, res) => {
   try {
