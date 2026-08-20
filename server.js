@@ -207,7 +207,22 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
-
+// TEMPORARY ROUTE TO UPDATE DATABASE
+app.get('/api/update-database-consents', async (req, res) => {
+  try {
+    const query = `
+      ALTER TABLE service_requests
+      ADD COLUMN consent_to_treat BOOLEAN DEFAULT FALSE,
+      ADD COLUMN hipaa_notice_received BOOLEAN DEFAULT FALSE,
+      ADD COLUMN telehealth_consent BOOLEAN DEFAULT FALSE;
+    `;
+    await pool.query(query);
+    res.send('Database successfully updated with consent columns! You can now delete this route.');
+  } catch (err) {
+    // If it says "column already exists", that means it worked previously!
+    res.send('Error or already updated: ' + err.message);
+  }
+});
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
