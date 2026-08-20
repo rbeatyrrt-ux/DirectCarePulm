@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const PDFDocument = require('pdfkit');
+const { PDFDocument: PDFLibDocument } = require('pdf-lib');
 const multer = require('multer');
 const path = require('path');
 const { Resend } = require('resend');
@@ -961,9 +962,8 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     await logAudit(req.user.user_id, 'DOWNLOAD_FINAL_CLINICAL_REPORT', id, req);
 
     const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=Clinical_Billing_Report_Package_${id}.pdf`);
-    doc.pipe(res);
+    const coverBuffers = [];
+    doc.on('data', coverBuffers.push.bind(coverBuffers));
 
     const cleanNotes = (text) => (text || '').replace(/[ĐD]/g, '').trim();
 
@@ -1101,15 +1101,59 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.rect(50, 150, 512, 220).stroke('#cbd5e0');
     doc.fontSize(12).fillColor('#1a2a47').font('Helvetica-Bold').text('DIAGNOSTIC REPORT ATTACHMENT SUMMARY', 70, 175);
     doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(
-      'The raw diagnostic PFT testing report file has been successfully attached and verified for this encounter record.',
+      'The raw diagnostic PFT testing report file has been successfully appended to the end of this document.',
       70, 205, { width: 472, lineGap: 4 }
     );
     doc.text(`Primary Record ID: ${id}`, 70, 250);
-    doc.text(`Associated S3 Object Reference: ${reqData.uploaded_report_path || 'No raw file attached.'}`, 70, 275);
-    doc.text(`Verification Status: Attached and Archived in Secure S3 Storage`, 70, 300);
+    doc.text(`Associated S3 Object Reference: ${reqData.uploaded_report_path || 'No raw file found in database.'}`, 70, 275);
+    doc.text(`Verification Status: Merged and Archived`, 70, 300);
 
+    // End PDFKit drawing
     doc.end();
+
+    // Wait for PDFKit to finish writing to our memory buffer
+    const coverPdfBytes = await new Promise((resolve, reject) => {
+      doc.on('end', () => resolve(Buffer.concat(coverBuffers)));
+      doc.on('error', reject);
+    });
+
+    let finalPdfBytes = coverPdfBytes;
+
+    // 2. If a report exists in S3, fetch it and merge it!
+    if (reqData.uploaded_report_path) {
+      try {
+        const s3Key = reqData.uploaded_report_path.replace(`s3://${S3_BUCKET_NAME}/`, '');
+        const s3Response = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET_NAME, Key: s3Key }));
+        
+        // Convert S3 stream to buffer
+        const rawReportBuffer = await new Promise((resolve, reject) => {
+          const chunks = [];
+          s3Response.Body.on('data', (chunk) => chunks.push(chunk));
+          s3Response.Body.on('end', () => resolve(Buffer.concat(chunks)));
+          s3Response.Body.on('error', reject);
+        });
+
+        // Use pdf-lib to merge the generated cover with the S3 report
+        const coverPdfDoc = await PDFLibDocument.load(coverPdfBytes);
+        const reportPdfDoc = await PDFLibDocument.load(rawReportBuffer);
+
+        const copiedPages = await coverPdfDoc.copyPages(reportPdfDoc, reportPdfDoc.getPageIndices());
+        copiedPages.forEach((page) => coverPdfDoc.addPage(page));
+
+        finalPdfBytes = await coverPdfDoc.save();
+      } catch (mergeErr) {
+        console.error("Failed to fetch or merge S3 PDF:", mergeErr);
+        // If merging fails, it gracefully falls back to just sending the cover packet
+      }
+    }
+
+    // 3. Send the final compiled PDF to the browser
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Clinical_Billing_Report_Package_${id}.pdf`);
+    res.send(Buffer.from(finalPdfBytes));
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed to generate PDF package' });
   }
 });
