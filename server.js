@@ -965,7 +965,11 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     const coverBuffers = [];
     doc.on('data', coverBuffers.push.bind(coverBuffers));
 
-    const cleanNotes = (text) => (text || '').replace(/[ĐD]/g, '').trim();
+    // CLEAN-UP HELPER TO STRIP OUT DECODING ARTIFACT SYMBOLS (Ð)
+    const cleanNotes = (text) => {
+      if (!text) return '';
+      return text.replace(/[\u00D0Đ]/g, '').trim();
+    };
 
     doc.addPage();
     doc.fontSize(26).fillColor('#002b5c').text('DirectCare PFT Services', { align: 'center' });
@@ -1001,11 +1005,11 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.moveDown(1);
 
     doc.font('Helvetica-Bold').text('Ordering Reason / Clinical Indication:');
-    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(reqData.ordering_reason || 'None specified', { lineGap: 4 });
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.ordering_reason) || 'None specified', { lineGap: 4 });
     doc.moveDown(1);
 
     doc.fontSize(11).fillColor('#1a2a47').font('Helvetica-Bold').text('Tests Ordered:');
-    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(reqData.tests_ordered || 'Standard PFT Package', { lineGap: 4 });
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.tests_ordered) || 'Standard PFT Package', { lineGap: 4 });
     doc.moveDown(2);
 
     doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
@@ -1025,7 +1029,6 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
       
       doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(`Patient/Guardian Signature:`, 65, patBoxY + 15);
       
-      // Convert Base64 back to raw image buffer for PDFKit
       const patImgBuffer = Buffer.from(reqData.patient_signature.replace(/^data:image\/\w+;base64,/, ""), 'base64');
       doc.image(patImgBuffer, 65, patBoxY + 30, { width: 160, height: 50 });
       
@@ -1111,7 +1114,6 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     // End PDFKit drawing
     doc.end();
 
-    // Wait for PDFKit to finish writing to our memory buffer
     const coverPdfBytes = await new Promise((resolve, reject) => {
       doc.on('end', () => resolve(Buffer.concat(coverBuffers)));
       doc.on('error', reject);
@@ -1119,13 +1121,11 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
 
     let finalPdfBytes = coverPdfBytes;
 
-    // 2. If a report exists in S3, fetch it and merge it!
     if (reqData.uploaded_report_path) {
       try {
         const s3Key = reqData.uploaded_report_path.replace(`s3://${S3_BUCKET_NAME}/`, '');
         const s3Response = await s3Client.send(new GetObjectCommand({ Bucket: S3_BUCKET_NAME, Key: s3Key }));
         
-        // Convert S3 stream to buffer
         const rawReportBuffer = await new Promise((resolve, reject) => {
           const chunks = [];
           s3Response.Body.on('data', (chunk) => chunks.push(chunk));
@@ -1133,7 +1133,6 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
           s3Response.Body.on('error', reject);
         });
 
-        // Use pdf-lib to merge the generated cover with the S3 report
         const coverPdfDoc = await PDFLibDocument.load(coverPdfBytes);
         const reportPdfDoc = await PDFLibDocument.load(rawReportBuffer);
 
@@ -1143,11 +1142,9 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
         finalPdfBytes = await coverPdfDoc.save();
       } catch (mergeErr) {
         console.error("Failed to fetch or merge S3 PDF:", mergeErr);
-        // If merging fails, it gracefully falls back to just sending the cover packet
       }
     }
 
-    // 3. Send the final compiled PDF to the browser
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=Clinical_Billing_Report_Package_${id}.pdf`);
     res.send(Buffer.from(finalPdfBytes));
