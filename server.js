@@ -1015,7 +1015,8 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     );
     doc.text(`NPI: ${reqData.prov_npi || 'N/A'}`, 65, doc.y + 4);
     doc.text(`Attestation: Order electronically signed and authorized for scheduling.`, 65, doc.y + 4);
-// --- START PATIENT CONSENT SIGNATURE INJECTION ---
+
+    // --- START PATIENT CONSENT SIGNATURE INJECTION ---
     if (reqData.patient_signature && reqData.patient_signature.startsWith('data:image')) {
       doc.moveDown(2);
       doc.rect(50, doc.y, 512, 100).stroke('#38a169');
@@ -1031,6 +1032,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
       doc.text(`Status: Electronically Captured and Cryptographically Secured`, 65, patBoxY + 85);
     }
     // --- END PATIENT CONSENT SIGNATURE INJECTION ---
+
     doc.addPage();
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 2: CPT BILLING & CODING GUIDE');
     doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
@@ -1039,16 +1041,31 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.fontSize(10).fillColor('#4a5568').text('The following CPT billing codes, required modifiers, and documentation guidelines govern reimbursement for this encounter:');
     doc.moveDown(1);
 
-    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94060: Spirometry, pre and post-bronchodilator');
-    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: Append modifier 26 if billing professional component only, or TC for technical component. Ensure appropriate ICD-10 medical necessity linkage.');
-    doc.moveDown(0.8);
+    const orderedTests = reqData.tests_ordered || '';
 
-    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94664: Demonstration & Evaluation of MDI Technique');
-    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: When billed concurrently with evaluation and management (E/M) services or separate diagnostic testing on the same date of service, Modifier 59 (Distinct Procedural Service) or Modifier XU is strictly required by most commercial and government payers to prevent bundling edits. Documentation must verify patient return-demonstration.');
-    doc.moveDown(0.8);
+    if (orderedTests.includes('94060') || orderedTests.includes('Spirometry') || orderedTests.includes('Full PFT')) {
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94060: Spirometry, pre and post-bronchodilator');
+      doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: Append modifier 26 if billing professional component only, or TC for technical component. Ensure appropriate ICD-10 medical necessity linkage.');
+      doc.moveDown(0.8);
+    }
 
-    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94729: Diffusing Capacity (DLCO)');
-    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Single-breath carbon monoxide diffusing capacity measurement.');
+    if (orderedTests.includes('94726') || orderedTests.includes('Lung Volumes') || orderedTests.includes('Full PFT')) {
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94726: Plethysmography (Lung Volumes)');
+      doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Measurement of lung volumes (e.g., functional residual capacity [FRC], residual volume [RV], and total lung capacity [TLC]).');
+      doc.moveDown(0.8);
+    }
+
+    if (orderedTests.includes('94729') || orderedTests.includes('DLCO') || orderedTests.includes('Full PFT')) {
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94729: Diffusing Capacity (DLCO)');
+      doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Single-breath carbon monoxide diffusing capacity measurement.');
+      doc.moveDown(0.8);
+    }
+
+    if (orderedTests.includes('94664') || orderedTests.includes('MDI')) {
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94664: Demonstration & Evaluation of MDI Technique');
+      doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: When billed concurrently with E/M services or separate diagnostic testing on the same date of service, Modifier 59 (Distinct Procedural Service) or Modifier XU is strictly required by most commercial and government payers to prevent bundling edits. Documentation must verify patient return-demonstration.');
+      doc.moveDown(0.8);
+    }
 
     doc.addPage();
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 3: PHYSICIAN CLINICAL OVERREAD');
