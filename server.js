@@ -965,10 +965,13 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     const coverBuffers = [];
     doc.on('data', coverBuffers.push.bind(coverBuffers));
 
-    // CLEAN-UP HELPER TO STRIP OUT DECODING ARTIFACT SYMBOLS (Ð)
+    // UPDATED CLEAN-UP HELPER TO STRIP OUT Ð CHARACTERS AND BAD NEWLINE/CARRIAGE RETURNS
     const cleanNotes = (text) => {
       if (!text) return '';
-      return text.replace(/[\u00D0Đ]/g, '').trim();
+      return text
+        .replace(/[\u00D0Đ\r]/g, '')     
+        .replace(/\n\s*\n/g, '\n')       
+        .trim();
     };
 
     doc.addPage();
