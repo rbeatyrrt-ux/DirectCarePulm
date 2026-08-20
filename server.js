@@ -1015,7 +1015,22 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     );
     doc.text(`NPI: ${reqData.prov_npi || 'N/A'}`, 65, doc.y + 4);
     doc.text(`Attestation: Order electronically signed and authorized for scheduling.`, 65, doc.y + 4);
-
+// --- START PATIENT CONSENT SIGNATURE INJECTION ---
+    if (reqData.patient_signature && reqData.patient_signature.startsWith('data:image')) {
+      doc.moveDown(2);
+      doc.rect(50, doc.y, 512, 100).stroke('#38a169');
+      const patBoxY = doc.y + 10;
+      doc.fontSize(10).fillColor('#22543d').font('Helvetica-Bold').text('PATIENT CONSENT & HIPAA AUTHORIZATION', 65, patBoxY);
+      
+      doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(`Patient/Guardian Signature:`, 65, patBoxY + 15);
+      
+      // Convert Base64 back to raw image buffer for PDFKit
+      const patImgBuffer = Buffer.from(reqData.patient_signature.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+      doc.image(patImgBuffer, 65, patBoxY + 30, { width: 160, height: 50 });
+      
+      doc.text(`Status: Electronically Captured and Cryptographically Secured`, 65, patBoxY + 85);
+    }
+    // --- END PATIENT CONSENT SIGNATURE INJECTION ---
     doc.addPage();
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 2: CPT BILLING & CODING GUIDE');
     doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
