@@ -681,10 +681,12 @@ app.get('/api/requests', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT sr.*, u_phys.full_name as phys_name, u_phys.credentials as phys_credentials, u_phys.npi as phys_npi,
-             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi
+             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi,
+             u_rrt.full_name as rrt_name, u_rrt.credentials as rrt_credentials, u_rrt.npi as rrt_npi
       FROM service_requests sr
       LEFT JOIN users u_phys ON sr.physician_id = u_phys.user_id
       LEFT JOIN users u_prov ON sr.provider_id = u_prov.user_id
+      LEFT JOIN users u_rrt ON sr.assigned_rrt_id = u_rrt.user_id
       WHERE sr.is_deleted = FALSE ORDER BY sr.request_id DESC
     `);
     res.json(result.rows);
@@ -696,10 +698,12 @@ app.get('/api/audit/requests', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT sr.*, u_phys.full_name as phys_name, u_phys.credentials as phys_credentials, u_phys.npi as phys_npi,
-             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi
+             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi,
+             u_rrt.full_name as rrt_name, u_rrt.credentials as rrt_credentials, u_rrt.npi as rrt_npi
       FROM service_requests sr
       LEFT JOIN users u_phys ON sr.physician_id = u_phys.user_id
       LEFT JOIN users u_prov ON sr.provider_id = u_prov.user_id
+      LEFT JOIN users u_rrt ON sr.assigned_rrt_id = u_rrt.user_id
       ORDER BY sr.request_id DESC
     `);
     res.json(result.rows);
@@ -776,7 +780,7 @@ app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to update order status: ' + err.message }); }
 });
 
-// PRELIMINARY RESULTS UPLOAD -> SENDS NOTIFICATION
+// PRELIMINARY RESULTS UPLOAD -> SENDS NOTIFICATION & RECORDS RRT ID
 app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -791,11 +795,11 @@ app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), a
       reportPath = `s3://${S3_BUCKET_NAME}/${s3Key}`;
     }
 
-    let query = `UPDATE service_requests SET status = 'PRELIMINARY_RESULTS', rrt_notes = $1, mdi_education = $2, recommended_interpretation = $3`;
-    let params = [rrt_notes, mdi_education, recommended_interpretation];
+    let query = `UPDATE service_requests SET status = 'PRELIMINARY_RESULTS', rrt_notes = $1, mdi_education = $2, recommended_interpretation = $3, assigned_rrt_id = $4`;
+    let params = [rrt_notes, mdi_education, recommended_interpretation, req.user.user_id];
 
-    if (reportPath) { query += `, uploaded_report_path = $4 WHERE request_id = $5 RETURNING *;`; params.push(reportPath, id); } 
-    else { query += ` WHERE request_id = $4 RETURNING *;`; params.push(id); }
+    if (reportPath) { query += `, uploaded_report_path = $5 WHERE request_id = $6 RETURNING *;`; params.push(reportPath, id); } 
+    else { query += ` WHERE request_id = $5 RETURNING *;`; params.push(id); }
 
     const result = await pool.query(query, params);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Request not found' });
@@ -949,10 +953,12 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     const { id } = req.params;
     const reqResult = await pool.query(`
       SELECT sr.*, u_phys.full_name as phys_name, u_phys.credentials as phys_credentials, u_phys.npi as phys_npi,
-             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi
+             u_prov.full_name as prov_name, u_prov.credentials as prov_credentials, u_prov.npi as prov_npi,
+             u_rrt.full_name as rrt_name, u_rrt.credentials as rrt_credentials, u_rrt.npi as rrt_npi
       FROM service_requests sr
       LEFT JOIN users u_phys ON sr.physician_id = u_phys.user_id
       LEFT JOIN users u_prov ON sr.provider_id = u_prov.user_id
+      LEFT JOIN users u_rrt ON sr.assigned_rrt_id = u_rrt.user_id
       WHERE sr.request_id = $1
     `, [id]);
 
@@ -965,7 +971,6 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     const coverBuffers = [];
     doc.on('data', coverBuffers.push.bind(coverBuffers));
 
-    // UPDATED CLEAN-UP HELPER TO STRIP OUT Ð CHARACTERS AND BAD NEWLINE/CARRIAGE RETURNS
     const cleanNotes = (text) => {
       if (!text) return '';
       return text
@@ -1023,21 +1028,16 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.text(`NPI: ${reqData.prov_npi || 'N/A'}`, 65, doc.y + 4);
     doc.text(`Attestation: Order electronically signed and authorized for scheduling.`, 65, doc.y + 4);
 
-    // --- START PATIENT CONSENT SIGNATURE INJECTION ---
     if (reqData.patient_signature && reqData.patient_signature.startsWith('data:image')) {
       doc.moveDown(2);
       doc.rect(50, doc.y, 512, 100).stroke('#38a169');
       const patBoxY = doc.y + 10;
       doc.fontSize(10).fillColor('#22543d').font('Helvetica-Bold').text('PATIENT CONSENT & HIPAA AUTHORIZATION', 65, patBoxY);
-      
       doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(`Patient/Guardian Signature:`, 65, patBoxY + 15);
-      
       const patImgBuffer = Buffer.from(reqData.patient_signature.replace(/^data:image\/\w+;base64,/, ""), 'base64');
       doc.image(patImgBuffer, 65, patBoxY + 30, { width: 160, height: 50 });
-      
       doc.text(`Status: Electronically Captured and Cryptographically Secured`, 65, patBoxY + 85);
     }
-    // --- END PATIENT CONSENT SIGNATURE INJECTION ---
 
     doc.addPage();
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 2: CPT BILLING & CODING GUIDE');
@@ -1074,7 +1074,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     }
 
     doc.addPage();
-    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 3: PHYSICIAN CLINICAL OVERREAD');
+    doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 3: CLINICAL TESTING & OVERREAD');
     doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
     doc.moveDown(1.5);
 
@@ -1090,8 +1090,19 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
     doc.moveDown(2);
 
-    doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
-    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('ELECTRONIC SIGNATURE & ATTESTATION', 65, doc.y + 10);
+    // --- RRT TECHNICAL COMPONENT SIGNATURE BOX ---
+    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('RRT TECHNICAL COMPONENT ATTESTATION', 65, doc.y + 10);
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(
+      `Performing RRT: ${reqData.rrt_name || 'Assigned Testing RRT'} (${reqData.rrt_credentials || 'RRT'})`, 65, doc.y + 6
+    );
+    doc.text(`NPI / Credentials: ${reqData.rrt_npi || 'Verified Testing Staff'}`, 65, doc.y + 4);
+    doc.text(`Attestation: Technical performance and spirometry quality verified per ATS/ERS standards.`, 65, doc.y + 4);
+    doc.moveDown(1.5);
+
+    // --- PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE BOX ---
+    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE', 65, doc.y + 10);
     doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(
       `Interpreting Physician: ${reqData.phys_name || 'Pending Review'} (${reqData.phys_credentials || 'MD'})`, 65, doc.y + 6
     );
