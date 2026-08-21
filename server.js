@@ -979,6 +979,15 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
         .trim();
     };
 
+    const formattedSignDate = new Date().toLocaleString('en-US', {
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+
     doc.addPage();
     doc.fontSize(26).fillColor('#002b5c').text('DirectCare PFT Services', { align: 'center' });
     doc.moveDown(0.5);
@@ -1020,13 +1029,14 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.tests_ordered) || 'Standard PFT Package', { lineGap: 4 });
     doc.moveDown(2);
 
-    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
+    // --- ORDERING PROVIDER SIGNATURE BLOCK ---
+    doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
     doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('ORDERING PROVIDER ELECTRONIC SIGNATURE', 65, doc.y + 10);
-    doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(
-      `Ordering Provider: ${reqData.prov_name || 'Attending Physician'} (${reqData.prov_credentials || 'MD/APRN'})`, 65, doc.y + 6
-    );
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
+    doc.text('Electronically Signed By', 65, doc.y + 6);
+    doc.text(`${reqData.prov_name || 'Attending Physician'}, ${reqData.prov_credentials || 'MD/APRN'}`, 65, doc.y + 4);
     doc.text(`NPI: ${reqData.prov_npi || 'N/A'}`, 65, doc.y + 4);
-    doc.text(`Attestation: Order electronically signed and authorized for scheduling.`, 65, doc.y + 4);
+    doc.text(`Date and Time: ${formattedSignDate}`, 65, doc.y + 4);
 
     if (reqData.patient_signature && reqData.patient_signature.startsWith('data:image')) {
       doc.moveDown(2);
@@ -1088,27 +1098,26 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
 
     doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('Final Physician Interpretation & Overread:');
     doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
-    doc.moveDown(2);
-
-    // --- RRT TECHNICAL COMPONENT SIGNATURE BOX ---
-    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
-    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('RRT TECHNICAL COMPONENT ATTESTATION', 65, doc.y + 10);
-    doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(
-      `Performing RRT: ${reqData.rrt_name || 'Assigned Testing RRT'} (${reqData.rrt_credentials || 'RRT'})`, 65, doc.y + 6
-    );
-    doc.text(`NPI / Credentials: ${reqData.rrt_npi || 'Verified Testing Staff'}`, 65, doc.y + 4);
-    doc.text(`Attestation: Technical performance and spirometry quality verified per ATS/ERS standards.`, 65, doc.y + 4);
     doc.moveDown(1.5);
 
-    // --- PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE BOX ---
+    // --- RRT TECHNICAL COMPONENT SIGNATURE BLOCK ---
+    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('RRT TECHNICAL COMPONENT ATTESTATION', 65, doc.y + 10);
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
+    doc.text('Electronically Signed By', 65, doc.y + 6);
+    doc.text(`${reqData.rrt_name || 'Assigned Testing RRT'}, ${reqData.rrt_credentials || 'RRT'}`, 65, doc.y + 4);
+    doc.text(`NPI: ${reqData.rrt_npi || 'N/A'}`, 65, doc.y + 4);
+    doc.text(`Date and Time: ${formattedSignDate}`, 65, doc.y + 4);
+    doc.moveDown(1.5);
+
+    // --- PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE BLOCK ---
     doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
     doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE', 65, doc.y + 10);
-    doc.font('Helvetica').fontSize(9).fillColor('#2d3748').text(
-      `Interpreting Physician: ${reqData.phys_name || 'Pending Review'} (${reqData.phys_credentials || 'MD'})`, 65, doc.y + 6
-    );
+    doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
+    doc.text('Electronically Signed By', 65, doc.y + 6);
+    doc.text(`${reqData.phys_name || 'Pending Review'}, ${reqData.phys_credentials || 'MD'}`, 65, doc.y + 4);
     doc.text(`NPI: ${reqData.phys_npi || 'N/A'}`, 65, doc.y + 4);
-    doc.text(`Verification Status: Cryptographically Verified via Secure DirectCare PIN`, 65, doc.y + 4);
-    doc.text(`Associated Request ID: ${id} | Status: ${reqData.status}`, 65, doc.y + 4);
+    doc.text(`Date and Time: ${formattedSignDate}`, 65, doc.y + 4);
 
     doc.addPage();
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 4: ATTACHED PFT DIAGNOSTIC REPORT');
