@@ -1065,6 +1065,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.moveDown(1);
 
     const orderedTests = reqData.tests_ordered || '';
+    const mdiOmitted = reqData.mdi_education && reqData.mdi_education.toLowerCase().includes('omitted');
 
     if (orderedTests.includes('94060') || orderedTests.includes('Spirometry') || orderedTests.includes('Full PFT')) {
       doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94060: Spirometry, pre and post-bronchodilator');
@@ -1084,7 +1085,8 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
       doc.moveDown(0.8);
     }
 
-    if (orderedTests.includes('94664') || orderedTests.includes('MDI')) {
+    // UPDATED: Only print the CPT 94664 billing block if it was ordered AND not marked as omitted by the RRT
+    if ((orderedTests.includes('94664') || orderedTests.includes('MDI')) && !mdiOmitted) {
       doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94664: Demonstration & Evaluation of MDI Technique');
       doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: When billed concurrently with E/M services or separate diagnostic testing on the same date of service, Modifier 59 (Distinct Procedural Service) or Modifier XU is strictly required by most commercial and government payers to prevent bundling edits. Documentation must verify patient return-demonstration.');
       doc.moveDown(0.8);
