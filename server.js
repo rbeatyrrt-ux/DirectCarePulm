@@ -160,6 +160,8 @@ async function initializeDatabase() {
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS hipaa_notice_received BOOLEAN DEFAULT FALSE;
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS telehealth_consent BOOLEAN DEFAULT FALSE;
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_signature TEXT;
+      ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS preliminary_signed_at TIMESTAMP;
+      ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS final_signed_at TIMESTAMP;
 
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed BOOLEAN DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
@@ -780,7 +782,7 @@ app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to update order status: ' + err.message }); }
 });
 
-// PRELIMINARY RESULTS UPLOAD -> SENDS NOTIFICATION & RECORDS RRT ID
+// PRELIMINARY RESULTS UPLOAD -> RECORDS RRT ID AND PRELIMINARY SIGNATURE TIMESTAMP
 app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -795,7 +797,7 @@ app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), a
       reportPath = `s3://${S3_BUCKET_NAME}/${s3Key}`;
     }
 
-    let query = `UPDATE service_requests SET status = 'PRELIMINARY_RESULTS', rrt_notes = $1, mdi_education = $2, recommended_interpretation = $3, assigned_rrt_id = $4`;
+    let query = `UPDATE service_requests SET status = 'PRELIMINARY_RESULTS', rrt_notes = $1, mdi_education = $2, recommended_interpretation = $3, assigned_rrt_id = $4, preliminary_signed_at = CURRENT_TIMESTAMP`;
     let params = [rrt_notes, mdi_education, recommended_interpretation, req.user.user_id];
 
     if (reportPath) { query += `, uploaded_report_path = $5 WHERE request_id = $6 RETURNING *;`; params.push(reportPath, id); } 
@@ -836,7 +838,7 @@ app.get('/api/requests/:id/raw-report', verifyToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to stream report PDF from S3: ' + err.message }); }
 });
 
-// FINALIZE REVIEW -> SENDS COMPLETION EMAIL
+// FINALIZE REVIEW -> RECORDS PHYSICIAN ID AND FINAL SIGNATURE TIMESTAMP
 app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
   const { id } = req.params;
   const { interpretation, signature_pin } = req.body;
@@ -856,7 +858,7 @@ app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
     if (!validPin) return res.status(401).json({ error: 'Incorrect Signature PIN.' });
 
     const result = await pool.query(
-      `UPDATE service_requests SET status = 'COMPLETED', interpretation = $1, physician_id = $2 WHERE request_id = $3 RETURNING *`, 
+      `UPDATE service_requests SET status = 'COMPLETED', interpretation = $1, physician_id = $2, final_signed_at = CURRENT_TIMESTAMP WHERE request_id = $3 RETURNING *`, 
       [interpretation, req.user.user_id, id]
     );
 
@@ -979,14 +981,18 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
         .trim();
     };
 
-    const formattedSignDate = new Date().toLocaleString('en-US', {
-      month: 'numeric',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
+    // Formatted timestamps pulled directly from database event logs, falling back to creation timestamp if unassigned
+    const providerSignTime = reqData.requested_date_timestamp 
+      ? new Date(reqData.requested_date_timestamp).toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) 
+      : 'N/A';
+
+    const rrtSignTime = reqData.preliminary_signed_at 
+      ? new Date(reqData.preliminary_signed_at).toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) 
+      : (reqData.status === 'COMPLETED' || reqData.status === 'PRELIMINARY_RESULTS' ? 'Verified Testing Session' : 'Pending');
+
+    const physicianSignTime = reqData.final_signed_at 
+      ? new Date(reqData.final_signed_at).toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) 
+      : (reqData.status === 'COMPLETED' ? 'Completed' : 'Pending');
 
     doc.addPage();
     doc.fontSize(26).fillColor('#002b5c').text('DirectCare PFT Services', { align: 'center' });
@@ -1029,17 +1035,18 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.tests_ordered) || 'Standard PFT Package', { lineGap: 4 });
     doc.moveDown(2);
 
-    // --- ORDERING PROVIDER SIGNATURE BLOCK ---
-    doc.rect(50, doc.y, 512, 85).stroke('#cbd5e0');
-    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('ORDERING PROVIDER ELECTRONIC SIGNATURE', 65, doc.y + 10);
+    // --- ORDERING PROVIDER SIGNATURE BLOCK (Box height increased to 95px to prevent overflow) ---
+    doc.rect(50, doc.y, 512, 95).stroke('#cbd5e0');
+    const provBoxY = doc.y + 10;
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('ORDERING PROVIDER ELECTRONIC SIGNATURE', 65, provBoxY);
     doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
-    doc.text('Electronically Signed By', 65, doc.y + 6);
-    doc.text(`${reqData.prov_name || 'Attending Physician'}, ${reqData.prov_credentials || 'MD/APRN'}`, 65, doc.y + 4);
-    doc.text(`NPI: ${reqData.prov_npi || 'N/A'}`, 65, doc.y + 4);
-    doc.text(`Date and Time: ${formattedSignDate}`, 65, doc.y + 4);
+    doc.text('Electronically Signed By', 65, provBoxY + 16);
+    doc.text(`${reqData.prov_name || 'Attending Physician'}, ${reqData.prov_credentials || 'MD/APRN'}`, 65, provBoxY + 30);
+    doc.text(`NPI: ${reqData.prov_npi || 'N/A'}`, 65, provBoxY + 44);
+    doc.text(`Date and Time: ${providerSignTime}`, 65, provBoxY + 58);
 
     if (reqData.patient_signature && reqData.patient_signature.startsWith('data:image')) {
-      doc.moveDown(2);
+      doc.moveDown(3);
       doc.rect(50, doc.y, 512, 100).stroke('#38a169');
       const patBoxY = doc.y + 10;
       doc.fontSize(10).fillColor('#22543d').font('Helvetica-Bold').text('PATIENT CONSENT & HIPAA AUTHORIZATION', 65, patBoxY);
@@ -1100,24 +1107,26 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
     doc.moveDown(1.5);
 
-    // --- RRT TECHNICAL COMPONENT SIGNATURE BLOCK ---
-    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
-    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('RRT TECHNICAL COMPONENT ATTESTATION', 65, doc.y + 10);
+    // --- RRT TECHNICAL COMPONENT SIGNATURE BLOCK (Height increased to 95px) ---
+    doc.rect(50, doc.y, 512, 95).stroke('#cbd5e0');
+    const rrtBoxY = doc.y + 10;
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('RRT TECHNICAL COMPONENT ATTESTATION', 65, rrtBoxY);
     doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
-    doc.text('Electronically Signed By', 65, doc.y + 6);
-    doc.text(`${reqData.rrt_name || 'Assigned Testing RRT'}, ${reqData.rrt_credentials || 'RRT'}`, 65, doc.y + 4);
-    doc.text(`NPI: ${reqData.rrt_npi || 'N/A'}`, 65, doc.y + 4);
-    doc.text(`Date and Time: ${formattedSignDate}`, 65, doc.y + 4);
-    doc.moveDown(1.5);
+    doc.text('Electronically Signed By', 65, rrtBoxY + 16);
+    doc.text(`${reqData.rrt_name || 'Assigned Testing RRT'}, ${reqData.rrt_credentials || 'RRT'}`, 65, rrtBoxY + 30);
+    doc.text(`NPI: ${reqData.rrt_npi || 'N/A'}`, 65, rrtBoxY + 44);
+    doc.text(`Date and Time: ${rrtSignTime}`, 65, rrtBoxY + 58);
+    doc.moveDown(2);
 
-    // --- PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE BLOCK ---
-    doc.rect(50, doc.y, 512, 75).stroke('#cbd5e0');
-    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE', 65, doc.y + 10);
+    // --- PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE BLOCK (Height increased to 95px) ---
+    doc.rect(50, doc.y, 512, 95).stroke('#cbd5e0');
+    const physBoxY = doc.y + 10;
+    doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE', 65, physBoxY);
     doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
-    doc.text('Electronically Signed By', 65, doc.y + 6);
-    doc.text(`${reqData.phys_name || 'Pending Review'}, ${reqData.phys_credentials || 'MD'}`, 65, doc.y + 4);
-    doc.text(`NPI: ${reqData.phys_npi || 'N/A'}`, 65, doc.y + 4);
-    doc.text(`Date and Time: ${formattedSignDate}`, 65, doc.y + 4);
+    doc.text('Electronically Signed By', 65, physBoxY + 16);
+    doc.text(`${reqData.phys_name || 'Pending Review'}, ${reqData.phys_credentials || 'MD'}`, 65, physBoxY + 30);
+    doc.text(`NPI: ${reqData.phys_npi || 'N/A'}`, 65, physBoxY + 44);
+    doc.text(`Date and Time: ${physicianSignTime}`, 65, physBoxY + 58);
 
     doc.addPage();
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 4: ATTACHED PFT DIAGNOSTIC REPORT');
