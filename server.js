@@ -7,6 +7,7 @@ const PDFDocument = require('pdfkit');
 const { PDFDocument: PDFLibDocument } = require('pdf-lib');
 const multer = require('multer');
 const path = require('path');
+const crypto = require('crypto'); // Added for random identifier generation
 const { Resend } = require('resend');
 const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 
@@ -162,6 +163,9 @@ async function initializeDatabase() {
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_signature TEXT;
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS preliminary_signed_at TIMESTAMP;
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS final_signed_at TIMESTAMP;
+      
+      -- ADD UNIQUE ACCESSION ID COLUMN FOR RANDOM IDENTIFIERS
+      ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS tracking_id VARCHAR(50);
 
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed BOOLEAN DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed_date TIMESTAMP;
@@ -384,7 +388,6 @@ app.get('/api/auth/signed-baa-pdf', verifyToken, async (req, res) => {
     doc.text(`Associated Clinic: ${userData.clinic_name || 'Independent Practice / System User'}`, 65, doc.y + 4);
     doc.text(`Legal Signer Name: ${userData.baa_signer_name || userData.full_name}`, 65, doc.y + 4);
     
-    // Explicitly lock BAA generation timestamps to EST
     const baaTimeOptions = { timeZone: 'America/New_York', month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
     doc.text(`Execution Timestamp: ${new Date(userData.baa_signed_date).toLocaleString('en-US', baaTimeOptions)}`, 65, doc.y + 4);
     
@@ -776,7 +779,7 @@ app.put('/api/requests/:id/schedule', verifyToken, async (req, res) => {
     if (targetReq.provider_email) {
       sendTrackedEmail(
         targetReq.provider_email,
-        `Patient Order Scheduled - #${id} (${targetReq.patient_name})`,
+        `Patient Order Scheduled - ID: ${targetReq.tracking_id || id} (${targetReq.patient_name})`,
         `<p>Hello Dr./Provider ${targetReq.provider_name || ''},</p><p>Your test order for patient <strong>${targetReq.patient_name}</strong> has been approved and scheduled for <strong>${new Date(targetReq.requested_date).toLocaleDateString()}</strong> (${targetReq.time_block.replace('_', ' - ')}).</p>`,
         id
       );
@@ -814,8 +817,8 @@ app.put('/api/requests/:id/preliminary', verifyToken, upload.single('report'), a
     for (let phys of physQuery.rows) {
       sendTrackedEmail(
         phys.email,
-        `Preliminary PFT Results Ready for Overread - Order #${id}`,
-        `<p>Hello Dr. ${phys.full_name},</p><p>Preliminary technical results and RRT notes have been uploaded for order #${id}. Please log in to complete your physician interpretation.</p>`,
+        `Preliminary PFT Results Ready for Overread - Order ${result.rows[0].tracking_id || '#' + id}`,
+        `<p>Hello Dr. ${phys.full_name},</p><p>Preliminary technical results and RRT notes have been uploaded for order ${result.rows[0].tracking_id || '#' + id}. Please log in to complete your physician interpretation.</p>`,
         id
       );
     }
@@ -881,7 +884,7 @@ app.put('/api/requests/:id/finalize', verifyToken, async (req, res) => {
       const order = orderData.rows[0];
       sendTrackedEmail(
         order.provider_email,
-        `PFT Report Completed - Patient ${order.patient_name} (Order #${id})`,
+        `PFT Report Completed - Patient ${order.patient_name} (${order.tracking_id || '#' + id})`,
         `<p>Hello Dr./Provider ${order.provider_name || ''},</p><p>The final physician-interpreted PFT report for patient <strong>${order.patient_name}</strong> is now completed and available for download in the portal.</p>`,
         id
       );
@@ -932,11 +935,14 @@ app.post('/api/requests', verifyToken, async (req, res) => {
       if (conflictCheck.rows.length > 0) return res.status(400).json({ error: `Time slot conflict: Patient "${conflictCheck.rows[0].patient_name}" is already booked in this time slot.` });
     }
 
+    // Generate random 6-character hex identifier (e.g. PFT-B4F9A2)
+    const trackingId = 'PFT-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+
     const query = `
-      INSERT INTO service_requests (clinic_name, patient_name, patient_dob, insurance_type, ordering_reason, tests_ordered, requested_date, time_block, status, provider_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8, $9, $10) RETURNING *;
+      INSERT INTO service_requests (clinic_name, patient_name, patient_dob, insurance_type, ordering_reason, tests_ordered, requested_date, time_block, status, provider_id, tracking_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7::date, $8, $9, $10, $11) RETURNING *;
     `;
-    const result = await pool.query(query, [clinicName, patient_name, patient_dob || null, insurance_type, ordering_reason, tests_ordered, todayDate, time_block || null, initialStatus, assignedProviderId]);
+    const result = await pool.query(query, [clinicName, patient_name, patient_dob || null, insurance_type, ordering_reason, tests_ordered, todayDate, time_block || null, initialStatus, assignedProviderId, trackingId]);
     
     await logAudit(req.user.user_id, 'CREATE_PATIENT_ORDER', result.rows[0].request_id, req);
 
@@ -944,7 +950,7 @@ app.post('/api/requests', verifyToken, async (req, res) => {
     for (let admin of adminQuery.rows) {
       sendTrackedEmail(
         admin.email,
-        `New PFT Order Submitted - Patient ${patient_name}`,
+        `New PFT Order Submitted - Patient ${patient_name} (ID: ${trackingId})`,
         `<p>A new service request has been submitted for patient <strong>${patient_name}</strong> at <strong>${clinicName}</strong>.</p>`,
         result.rows[0].request_id
       );
@@ -1035,7 +1041,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
       70, 245, { width: 472, lineGap: 4 }
     );
 
-    doc.fontSize(10).fillColor('#718096').text(`Secure System Request Identifier: ${id}`, 70, 335);
+    doc.fontSize(10).fillColor('#718096').text(`Secure System Request Identifier: ${reqData.tracking_id || id}`, 70, 335);
     doc.text(`Package Generation Timestamp: ${new Date().toLocaleString('en-US', easternTimeOptions)}`, 70, 355);
 
     doc.addPage();
@@ -1165,7 +1171,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
       'The raw diagnostic PFT testing report file has been successfully appended to the end of this document.',
       70, 205, { width: 472, lineGap: 4 }
     );
-    doc.text(`Primary Record ID: ${id}`, 70, 250);
+    doc.text(`Primary Record ID: ${reqData.tracking_id || id}`, 70, 250);
     doc.text(`Associated S3 Object Reference: ${reqData.uploaded_report_path || 'No raw file found in database.'}`, 70, 275);
     doc.text(`Verification Status: Merged and Archived`, 70, 300);
 
@@ -1204,7 +1210,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     }
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=Clinical_Billing_Report_Package_${id}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=Clinical_Billing_Report_Package_${reqData.tracking_id || id}.pdf`);
     res.send(Buffer.from(finalPdfBytes));
 
   } catch (err) {
