@@ -383,7 +383,11 @@ app.get('/api/auth/signed-baa-pdf', verifyToken, async (req, res) => {
     doc.text(`Covered Entity / User: ${userData.full_name} (${userData.role.toUpperCase()})`, 65, doc.y + 6);
     doc.text(`Associated Clinic: ${userData.clinic_name || 'Independent Practice / System User'}`, 65, doc.y + 4);
     doc.text(`Legal Signer Name: ${userData.baa_signer_name || userData.full_name}`, 65, doc.y + 4);
-    doc.text(`Execution Timestamp: ${new Date(userData.baa_signed_date).toLocaleString()}`, 65, doc.y + 4);
+    
+    // Explicitly lock BAA generation timestamps to EST
+    const baaTimeOptions = { timeZone: 'America/New_York', month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+    doc.text(`Execution Timestamp: ${new Date(userData.baa_signed_date).toLocaleString('en-US', baaTimeOptions)}`, 65, doc.y + 4);
+    
     doc.text(`Origin IP Address: ${userData.baa_ip_address || 'Verified Secure Gateway'}`, 65, doc.y + 4);
     doc.moveDown(3);
 
@@ -417,7 +421,7 @@ app.get('/api/clinics/:id/baa-pdf', verifyToken, async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename=Executed_BAA_${clinic.clinic_name.replace(/\s+/g, '_')}.pdf`);
     doc.pipe(res);
 
-    const effectiveDate = new Date(clinic.baa_signed_date).toLocaleDateString();
+    const effectiveDate = new Date(clinic.baa_signed_date).toLocaleDateString('en-US', { timeZone: 'America/New_York' });
 
     doc.fontSize(16).fillColor('#002b5c').font('Helvetica-Bold').text('HIPAA BUSINESS ASSOCIATE AGREEMENT', { align: 'center' });
     doc.moveDown(1.5);
@@ -981,17 +985,38 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
         .trim();
     };
 
-    // Formatted timestamps pulled directly from database event logs, falling back to creation timestamp if unassigned
+    // STRICT TIMEZONE OPTIONS TO PREVENT UTC CLOUD SHIFT
+    const easternTimeOptions = {
+      timeZone: 'America/New_York',
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    };
+
+    const utcDateOptions = {
+      timeZone: 'UTC',
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric'
+    };
+
+    // Safely format dates and timestamps
+    const formattedDOB = reqData.patient_dob ? new Date(reqData.patient_dob).toLocaleDateString('en-US', utcDateOptions) : 'N/A';
+    const formattedReqDate = reqData.requested_date ? new Date(reqData.requested_date).toLocaleDateString('en-US', utcDateOptions) : 'N/A';
+
     const providerSignTime = reqData.requested_date_timestamp 
-      ? new Date(reqData.requested_date_timestamp).toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) 
+      ? new Date(reqData.requested_date_timestamp).toLocaleString('en-US', easternTimeOptions) 
       : 'N/A';
 
     const rrtSignTime = reqData.preliminary_signed_at 
-      ? new Date(reqData.preliminary_signed_at).toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) 
+      ? new Date(reqData.preliminary_signed_at).toLocaleString('en-US', easternTimeOptions) 
       : (reqData.status === 'COMPLETED' || reqData.status === 'PRELIMINARY_RESULTS' ? 'Verified Testing Session' : 'Pending');
 
     const physicianSignTime = reqData.final_signed_at 
-      ? new Date(reqData.final_signed_at).toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) 
+      ? new Date(reqData.final_signed_at).toLocaleString('en-US', easternTimeOptions) 
       : (reqData.status === 'COMPLETED' ? 'Completed' : 'Pending');
 
     doc.addPage();
@@ -1011,7 +1036,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     );
 
     doc.fontSize(10).fillColor('#718096').text(`Secure System Request Identifier: ${id}`, 70, 335);
-    doc.text(`Package Generation Timestamp: ${new Date().toLocaleString()}`, 70, 355);
+    doc.text(`Package Generation Timestamp: ${new Date().toLocaleString('en-US', easternTimeOptions)}`, 70, 355);
 
     doc.addPage();
     doc.fontSize(18).fillColor('#002b5c').font('Helvetica-Bold').text('SECTION 1: ORIGINAL PROVIDER ORDER');
@@ -1020,10 +1045,10 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
 
     doc.fontSize(11).fillColor('#1a2a47');
     doc.font('Helvetica-Bold').text('Patient Full Name: ', { continued: true }).font('Helvetica').text(reqData.patient_name || 'N/A');
-    doc.font('Helvetica-Bold').text('Patient Date of Birth: ', { continued: true }).font('Helvetica').text(reqData.patient_dob ? new Date(reqData.patient_dob).toLocaleDateString() : 'N/A');
+    doc.font('Helvetica-Bold').text('Patient Date of Birth: ', { continued: true }).font('Helvetica').text(formattedDOB);
     doc.font('Helvetica-Bold').text('Ordering Clinic: ', { continued: true }).font('Helvetica').text(reqData.clinic_name || 'N/A');
     doc.font('Helvetica-Bold').text('Insurance / Payer Type: ', { continued: true }).font('Helvetica').text(reqData.insurance_type || 'N/A');
-    doc.font('Helvetica-Bold').text('Requested Testing Date: ', { continued: true }).font('Helvetica').text(reqData.requested_date ? new Date(reqData.requested_date).toLocaleDateString() : 'N/A');
+    doc.font('Helvetica-Bold').text('Requested Testing Date: ', { continued: true }).font('Helvetica').text(formattedReqDate);
     doc.font('Helvetica-Bold').text('Time Slot Block: ', { continued: true }).font('Helvetica').text(reqData.time_block ? reqData.time_block.replace('_', ' - ') : 'N/A');
     doc.moveDown(1);
 
@@ -1035,7 +1060,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.tests_ordered) || 'Standard PFT Package', { lineGap: 4 });
     doc.moveDown(2);
 
-    // --- ORDERING PROVIDER SIGNATURE BLOCK (Box height increased to 95px to prevent overflow) ---
+    // --- ORDERING PROVIDER SIGNATURE BLOCK ---
     doc.rect(50, doc.y, 512, 95).stroke('#cbd5e0');
     const provBoxY = doc.y + 10;
     doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('ORDERING PROVIDER ELECTRONIC SIGNATURE', 65, provBoxY);
@@ -1085,7 +1110,6 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
       doc.moveDown(0.8);
     }
 
-    // UPDATED: Only print the CPT 94664 billing block if it was ordered AND not marked as omitted by the RRT
     if ((orderedTests.includes('94664') || orderedTests.includes('MDI')) && !mdiOmitted) {
       doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('• CPT 94664: Demonstration & Evaluation of MDI Technique');
       doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('  Required Modifiers: When billed concurrently with E/M services or separate diagnostic testing on the same date of service, Modifier 59 (Distinct Procedural Service) or Modifier XU is strictly required by most commercial and government payers to prevent bundling edits. Documentation must verify patient return-demonstration.');
@@ -1109,7 +1133,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
     doc.moveDown(1.5);
 
-    // --- RRT TECHNICAL COMPONENT SIGNATURE BLOCK (Height increased to 95px) ---
+    // --- RRT TECHNICAL COMPONENT SIGNATURE BLOCK ---
     doc.rect(50, doc.y, 512, 95).stroke('#cbd5e0');
     const rrtBoxY = doc.y + 10;
     doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('RRT TECHNICAL COMPONENT ATTESTATION', 65, rrtBoxY);
@@ -1120,7 +1144,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.text(`Date and Time: ${rrtSignTime}`, 65, rrtBoxY + 58);
     doc.moveDown(2);
 
-    // --- PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE BLOCK (Height increased to 95px) ---
+    // --- PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE BLOCK ---
     doc.rect(50, doc.y, 512, 95).stroke('#cbd5e0');
     const physBoxY = doc.y + 10;
     doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold').text('PHYSICIAN PROFESSIONAL COMPONENT SIGNATURE', 65, physBoxY);
