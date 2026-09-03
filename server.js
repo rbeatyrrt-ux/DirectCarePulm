@@ -7,7 +7,7 @@ const PDFDocument = require('pdfkit');
 const { PDFDocument: PDFLibDocument } = require('pdf-lib');
 const multer = require('multer');
 const path = require('path');
-const crypto = require('crypto'); // Added for random identifier generation
+const crypto = require('crypto');
 const { Resend } = require('resend');
 const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 
@@ -36,7 +36,7 @@ const pool = new Pool({
 });
 
 // ROBUST RESEND EMAIL SENDER WITH DATABASE LOGGING
-async function sendTrackedEmail(toEmail, subject, htmlContent, relatedRecordId = null) {
+async function sendTrackedEmail(toEmail, subject, htmlContent, relatedRecordId = null, attachments = []) {
   let status = 'SUCCESS';
   let errorMessage = null;
 
@@ -44,8 +44,10 @@ async function sendTrackedEmail(toEmail, subject, htmlContent, relatedRecordId =
     await resend.emails.send({
       from: 'DirectCare Portal <onboarding@resend.dev>',
       to: [toEmail],
+      cc: toEmail !== 'robert.beaty@directcarepulm.com' ? ['robert.beaty@directcarepulm.com'] : [],
       subject: subject,
-      html: htmlContent
+      html: htmlContent,
+      attachments: attachments
     });
   } catch (err) {
     status = 'FAILED';
@@ -62,6 +64,185 @@ async function sendTrackedEmail(toEmail, subject, htmlContent, relatedRecordId =
     console.error("Failed to write to email_logs table:", logErr);
   }
 }
+
+// --- BILLING ENGINE CALCULATOR (Contract Fee Schedule) ---
+const calculateTurnkeyFee = (req) => {
+  if (req.status !== 'COMPLETED') return 0;
+
+  const ins = (req.insurance_type || '').toLowerCase();
+  const tests = req.tests_ordered || '';
+  const mdiOmitted = req.mdi_education && req.mdi_education.toLowerCase().includes('omitted');
+  const includesMdi = (tests.includes('94664') || tests.includes('MDI')) && !mdiOmitted;
+
+  let isCommercial = ins.includes('commercial');
+  let isMedicare = ins.includes('medicare') || ins.includes('tricare');
+  let isMedicaid = ins.includes('medicaid');
+  let isSelfPay = ins.includes('self-pay') || ins.includes('dpc');
+
+  if (!isCommercial && !isMedicare && !isMedicaid && !isSelfPay) isCommercial = true;
+
+  let baseFee = 0;
+  
+  if (tests.includes('94060') && tests.includes('94726') && tests.includes('94729')) {
+    if (isCommercial) baseFee = 135;
+    else if (isMedicare) baseFee = 95;
+    else if (isMedicaid) baseFee = 75;
+    else if (isSelfPay) baseFee = 150;
+  } else if (tests.includes('94726') && tests.includes('94729') && !tests.includes('94060')) {
+    if (isCommercial) baseFee = 120;
+    else if (isMedicare) baseFee = 95;
+    else if (isMedicaid) baseFee = 75;
+    else if (isSelfPay) baseFee = 110;
+  } else if (tests.includes('94060') || tests.includes('94010')) {
+    if (isCommercial) baseFee = 95;
+    else if (isMedicare) baseFee = 75;
+    else if (isMedicaid) baseFee = 60;
+    else if (isSelfPay) baseFee = 75;
+  }
+
+  let mdiFee = 0;
+  if (includesMdi) {
+    if (isCommercial) mdiFee = 25;
+    else if (isMedicare) mdiFee = 18;
+    else if (isMedicaid) mdiFee = 12;
+    else if (isSelfPay) mdiFee = 15;
+  }
+
+  return baseFee + mdiFee;
+};
+
+// --- AUTOMATED MONTHLY INVOICE GENERATOR & CRON SCHEDULER ---
+async function generateAndSendMonthlyInvoices() {
+  console.log("Running automated monthly B2B invoice generation cycle...");
+  try {
+    const clinicsRes = await pool.query('SELECT * FROM clinics WHERE billing_email IS NOT NULL');
+    const clinics = clinicsRes.rows;
+
+    const now = new Date();
+    // Target the previous month
+    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const targetYearMonth = prevMonthDate.toISOString().substring(0, 7); // YYYY-MM
+    const invoicePeriodName = prevMonthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+    for (const clinic of clinics) {
+      const requestsRes = await pool.query(
+        `SELECT * FROM service_requests WHERE clinic_name = $1 AND status = 'COMPLETED' AND TO_CHAR(requested_date, 'YYYY-MM') = $2 AND is_deleted = FALSE`,
+        [clinic.clinic_name, targetYearMonth]
+      );
+      const records = requestsRes.rows;
+      if (records.length === 0) continue;
+
+      let runningTotal = 0;
+      let rowsHtml = '';
+
+      records.forEach(req => {
+        const fee = calculateTurnkeyFee(req);
+        runningTotal += fee;
+        const dos = req.requested_date ? new Date(req.requested_date).toLocaleDateString('en-US', {timeZone: 'UTC'}) : 'N/A';
+        rowsHtml += `
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #2b6cb0;">${req.tracking_id || `#${req.request_id}`}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${dos}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${req.insurance_type || 'Commercial'}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">$${fee.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      const invoiceNumber = 'INV-' + targetYearMonth.replace('-', '') + '-' + clinic.clinic_id;
+      const invoiceDate = new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York' });
+
+      // Build PDF In memory
+      const doc = new PDFDocument({ margin: 50 });
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+
+      doc.fontSize(22).fillColor('#002b5c').font('Helvetica-Bold').text('DIRECTCARE PULMONARY DIAGNOSTICS LLC', { align: 'right' });
+      doc.fontSize(9).fillColor('#4a5568').font('Helvetica').text('5537 State Route 508, Bellefontaine, OH 43311', { align: 'right' });
+      doc.text('support@directcarepft.com | (555) 000-0000', { align: 'right' });
+      doc.moveDown(2);
+
+      doc.fontSize(16).fillColor('#1a2a47').font('Helvetica-Bold').text('AUTOMATED B2B CORPORATE TECHNICAL INVOICE');
+      doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
+      doc.moveDown(1.5);
+
+      doc.fontSize(10).fillColor('#1a2a47').font('Helvetica-Bold');
+      doc.text('Bill To Practice:', 50, doc.y, { continued: true }).font('Helvetica').text(` ${clinic.clinic_name}`);
+      doc.font('Helvetica-Bold').text('Invoice Number:', 50, doc.y, { continued: true }).font('Helvetica').text(` ${invoiceNumber}`);
+      doc.font('Helvetica-Bold').text('Billing Period:', 50, doc.y, { continued: true }).font('Helvetica').text(` ${invoicePeriodName}`);
+      doc.font('Helvetica-Bold').text('Invoice Date:', 50, doc.y, { continued: true }).font('Helvetica').text(` ${invoiceDate}`);
+      doc.font('Helvetica-Bold').text('Payment Terms:', 50, doc.y, { continued: true }).font('Helvetica').text(' Net 30 from invoice date');
+      doc.moveDown(2);
+
+      doc.rect(50, doc.y, 512, 20).fill('#1a2a47');
+      doc.fillColor('white').font('Helvetica-Bold').fontSize(9);
+      doc.text('Tracking ID', 60, doc.y + 6);
+      doc.text('Date of Service', 170, doc.y + 6);
+      doc.text('Payer Class', 280, doc.y + 6);
+      doc.text('Turnkey Fee Due', 450, doc.y + 6, { align: 'right' });
+      doc.moveDown(1.5);
+
+      doc.font('Helvetica').fontSize(9).fillColor('#2d3748');
+      records.forEach(req => {
+        const fee = calculateTurnkeyFee(req);
+        const dos = req.requested_date ? new Date(req.requested_date).toLocaleDateString('en-US', {timeZone: 'UTC'}) : 'N/A';
+        const currentY = doc.y;
+        doc.text(req.tracking_id || `#${req.request_id}`, 60, currentY);
+        doc.text(dos, 170, currentY);
+        doc.text(req.insurance_type || 'Commercial', 280, currentY);
+        doc.text(`$${fee.toFixed(2)}`, 400, currentY, { align: 'right' });
+        doc.moveDown(1.2);
+      });
+
+      doc.moveTo(50, doc.y + 5).lineTo(562, doc.y + 5).stroke('#cbd5e0');
+      doc.moveDown(1);
+
+      doc.fontSize(12).fillColor('#002b5c').font('Helvetica-Bold');
+      doc.text(`TOTAL BALANCE DUE (USD): $${runningTotal.toFixed(2)}`, { align: 'right' });
+      doc.moveDown(3);
+
+      doc.fontSize(9).fillColor('#718096').font('Helvetica-Bold').text('REMITTANCE & COMPLIANCE ADVISORY:');
+      doc.font('Helvetica').fontSize(8).text(
+        'Please remit payment within 30 days of invoice date referencing the invoice number above. Per Master Clinical Partnership Agreement terms, ' +
+        'this document has been fully de-identified of all Protected Health Information (PHI) to ensure compliance with HIPAA Privacy and Security safeguards.',
+        { width: 512, lineGap: 3 }
+      );
+
+      doc.end();
+
+      const pdfBuffer = await new Promise((resolve, reject) => {
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+        doc.on('error', reject);
+      });
+
+      const emailHtml = `
+        <p>Hello ${clinic.clinic_name} Billing Team,</p>
+        <p>Attached is your automated monthly B2B technical invoice for diagnostic services rendered during <strong>${invoicePeriodName}</strong>.</p>
+        <p><strong>Total Balance Due:</strong> $${runningTotal.toFixed(2)} (Net 30 Terms)</p>
+        <p>Thank you for your continued partnership with DirectCare Pulmonary Diagnostics.</p>
+      `;
+
+      await sendTrackedEmail(
+        clinic.billing_email,
+        `Monthly B2B Invoice - ${invoicePeriodName} (${invoiceNumber})`,
+        emailHtml,
+        null,
+        [{ filename: `${invoiceNumber}.pdf`, content: pdfBuffer }]
+      );
+      console.log(`Automated invoice successfully sent to ${clinic.billing_email} for clinic ${clinic.clinic_name}`);
+    }
+  } catch (err) {
+    console.error("Automated monthly invoice task failed:", err);
+  }
+}
+
+// Check every 24 hours to see if today is the 1st of the month
+setInterval(() => {
+  const now = new Date();
+  if (now.getDate() === 1 && now.getHours() === 6) { // Runs on the 1st at 6:00 AM
+    generateAndSendMonthlyInvoices();
+  }
+}, 1000 * 60 * 60 * 24);
 
 async function initializeDatabase() {
   try {
@@ -163,8 +344,6 @@ async function initializeDatabase() {
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS patient_signature TEXT;
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS preliminary_signed_at TIMESTAMP;
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS final_signed_at TIMESTAMP;
-      
-      -- ADD UNIQUE ACCESSION ID COLUMN FOR RANDOM IDENTIFIERS
       ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS tracking_id VARCHAR(50);
 
       ALTER TABLE users ADD COLUMN IF NOT EXISTS baa_signed BOOLEAN DEFAULT FALSE;
@@ -1136,7 +1315,7 @@ app.get('/api/requests/:id/pdf', verifyToken, async (req, res) => {
     doc.moveDown(1);
 
     doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a2a47').text('Final Physician Interpretation & Overread:');
-    doc.font('Helvetica').fontSize(10).fillColor('#1a2a47').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text(cleanNotes(reqData.interpretation || reqData.recommended_interpretation) || 'Pending physician overread.', { lineGap: 4 });
     doc.moveDown(1.5);
 
     // --- RRT TECHNICAL COMPONENT SIGNATURE BLOCK ---
